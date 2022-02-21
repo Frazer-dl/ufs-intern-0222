@@ -27,7 +27,7 @@ public class CashOrder extends ExternalEntity {
   private String currencyType;
   private CashOrderStatus cashOrderStatus;
   private String workPlaceUId;
-  private Representative sender;
+  private Representative representative;
   private Subbranch recipientBank;
   private Subbranch senderBank;
   private String responseCode;
@@ -42,5 +42,6 @@ public class CashOrder extends ExternalEntity {
   private String userLogin;
   private String userFullName;
   private String userPosition;
+  private String account20202Num;
 
 }
