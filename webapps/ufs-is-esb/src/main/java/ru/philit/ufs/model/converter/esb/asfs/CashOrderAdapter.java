@@ -77,8 +77,14 @@ public class CashOrderAdapter extends AsfsAdapter {
     message.setCurrencyType(cashOrder.getCurrencyType());
     message.setCashOrderStatus(cashOrderStatusType(cashOrder.getCashOrderStatus()));
     message.setWorkPlaceUId(cashOrder.getWorkPlaceUId());
-    message.setRepData(repData(cashOrder.getRepresentative()));
-    message.setAdditionalInfo(additionalInfo(cashOrder.getRecipientBank(), cashOrder));
+    Representative representative = cashOrder.getRepresentative();
+    if (representative != null) {
+      message.setRepData(repData(representative));
+    }
+    Subbranch subbranch = cashOrder.getRecipientBank();
+    if (subbranch != null) {
+      message.setAdditionalInfo(additionalInfo(subbranch, cashOrder));
+    }
   }
 
   private static void map(SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage message,

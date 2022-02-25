@@ -1,14 +1,15 @@
 package ru.philit.ufs.model.converter.esb.asfs;
 
 import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
+import ru.philit.ufs.model.entity.esb.asfs.LimitStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs;
 import ru.philit.ufs.model.entity.oper.Limit;
 
 public class OverLimitAdapter extends AsfsAdapter {
 
-  private static boolean limitStatusType(String limitStatusType) {
-    return (limitStatusType.equals("true"));
+  private static boolean limitStatusType(LimitStatusType limitStatusType) {
+    return (limitStatusType.value().equals(LimitStatusType.LIMIT_PASSED.value()));
   }
 
   private static void map(SrvCheckOverLimitRq.SrvCheckOverLimitRqMessage message, Limit limit) {
@@ -19,7 +20,7 @@ public class OverLimitAdapter extends AsfsAdapter {
 
   private static void map(SrvCheckOverLimitRs.SrvCheckOverLimitRsMessage message,
       ExternalEntityContainer<Boolean> container) {
-    container.setData(limitStatusType(message.getStatus().value()));
+    container.setData(limitStatusType(message.getStatus()));
     container.setResponseCode(message.getResponseCode());
   }
 
@@ -40,7 +41,7 @@ public class OverLimitAdapter extends AsfsAdapter {
   public static ExternalEntityContainer<Boolean> convert(SrvCheckOverLimitRs response) {
     ExternalEntityContainer<Boolean> container = new ExternalEntityContainer<>();
     container.setResponseCode(response.getSrvCheckOverLimitRsMessage().getResponseCode());
-    container.setData(limitStatusType(response.getSrvCheckOverLimitRsMessage().getStatus().value()));
+    container.setData(limitStatusType(response.getSrvCheckOverLimitRsMessage().getStatus()));
     map(response.getHeaderInfo(), container);
     map(response.getSrvCheckOverLimitRsMessage(), container);
     return container;

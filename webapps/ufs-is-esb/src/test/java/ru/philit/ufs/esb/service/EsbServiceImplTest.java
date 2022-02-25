@@ -29,11 +29,14 @@ import ru.philit.ufs.model.entity.common.ExternalEntity;
 import ru.philit.ufs.model.entity.common.ExternalEntityRequest;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
+import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.Limit;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.request.RequestType;
+import ru.philit.ufs.model.entity.user.Workplace;
 
 public class EsbServiceImplTest {
 
@@ -335,6 +338,42 @@ public class EsbServiceImplTest {
     Assert.assertEquals(putRequests.size(), requestCount);
 
     // given
+    request.setRequestData(new CashOrder());
+
+    // when
+    request.setEntityType(RequestType.CREATE_CASH_ORDER);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // when
+    request.setEntityType(RequestType.UPDATE_CASH_ORDER_STATUS);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // given
+    request.setRequestData(new Limit());
+
+    // when
+    request.setEntityType(RequestType.CHECK_OVER_LIMIT);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // given
+    request.setRequestData(new Workplace());
+
+    // when
+    request.setEntityType(RequestType.GET_WORKPLACE_INFO);
+    esbService.sendRequest(request);
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // given
     request.setRequestData(new Serializable() {});
 
     String[] requestTypes = new String[] {RequestType.ACCOUNT_20202,
@@ -347,7 +386,9 @@ public class EsbServiceImplTest {
         RequestType.GET_REPRESENTATIVE_BY_CARD, RequestType.LEGAL_ENTITY_BY_ACCOUNT,
         RequestType.OPER_TYPES_BY_ROLE, RequestType.OPERATOR_BY_USER,
         RequestType.SEARCH_REPRESENTATIVE, RequestType.SEIZURES_BY_ACCOUNT,
-        RequestType.UPDATE_OPER_TASK, RequestType.UPDATE_OVN};
+        RequestType.UPDATE_OPER_TASK, RequestType.UPDATE_OVN,
+        RequestType.CREATE_CASH_ORDER, RequestType.CHECK_OVER_LIMIT,
+        RequestType.UPDATE_CASH_ORDER_STATUS, RequestType.GET_WORKPLACE_INFO};
     for (String requestType : requestTypes) {
       // when
       request.setEntityType(requestType);
