@@ -18,15 +18,17 @@ import ru.philit.ufs.model.entity.user.Subbranch;
 public class CashOrderAdapter extends AsfsAdapter {
 
   private static OperTypeLabel operTypeLabel(OperationTypeCode operationTypeCode) {
-    return (operationTypeCode != null) ? OperTypeLabel.fromValue(operationTypeCode.code()) : null;
+    return (operationTypeCode != null) ? OperTypeLabel.fromValue(operationTypeCode.code())
+        : null;
 
   }
 
   private static CashOrderStatusType cashOrderStatusType(CashOrderStatus cashOrderStatus) {
-    return (cashOrderStatus != null) ? CashOrderStatusType.fromValue(cashOrderStatus.code()) : null;
+    return (cashOrderStatus != null) ? CashOrderStatusType.fromValue(cashOrderStatus.code())
+        : null;
   }
 
-  private static CashOrderStatus cashOrderStatus(CashOrderStatusType cashOrderStatusType) {
+  private static CashOrderStatus cashOrderStatusType(CashOrderStatusType cashOrderStatusType) {
     return (cashOrderStatusType != null) ? CashOrderStatus.getByCode(cashOrderStatusType.value())
         : null;
   }
@@ -36,7 +38,8 @@ public class CashOrderAdapter extends AsfsAdapter {
     return (cashOrderType != null) ? CashOrderType.getByCode(cashOrderType.value()) : null;
   }
 
-  private static SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage.RepData repData(Representative representative) {
+  private static SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage.RepData repData(
+      Representative representative) {
     SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage.RepData repData
         = new SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage.RepData();
     repData.setAddress(representative.getAddress());
@@ -67,7 +70,8 @@ public class CashOrderAdapter extends AsfsAdapter {
     return additionalInfo;
   }
 
-  private static void map(SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage message, CashOrder cashOrder) {
+  private static void map(SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage message,
+      CashOrder cashOrder) {
     message.setCashOrderId(cashOrder.getCashOrderId());
     message.setOperationType(operTypeLabel(cashOrder.getOperationType()));
     message.setCashOrderINum(cashOrder.getCashOrderINum());
@@ -92,7 +96,7 @@ public class CashOrderAdapter extends AsfsAdapter {
     cashOrder.setCashOrderId(message.getCashOrderId());
     cashOrder.setCashOrderINum(message.getCashOrderINum());
     cashOrder.setCashOrderType(cashOrderType(message.getCashOrderType()));
-    cashOrder.setCashOrderStatus(cashOrderStatus(message.getCashOrderStatus()));
+    cashOrder.setCashOrderStatus(cashOrderStatusType(message.getCashOrderStatus()));
     cashOrder.setAccountId(message.getAccountId());
     cashOrder.setAmount(message.getAmount());
     cashOrder.setCashSymbols(new ArrayList<>());
@@ -106,7 +110,7 @@ public class CashOrderAdapter extends AsfsAdapter {
       }
     }
     cashOrder.setCreatedDttm(date(message.getCreatedDttm()));
-    cashOrder.setFDestLEName(message.getFDestLEName());
+    cashOrder.setFdestLeName(message.getFDestLEName());
 
     Representative representative = new Representative();
     representative.setInn(message.getINN());
@@ -127,7 +131,7 @@ public class CashOrderAdapter extends AsfsAdapter {
     senderBank.setBankName(message.getRecipientBank());
     senderBank.setBic(message.getRecipientBankBIC());
     cashOrder.setRecipientBank(senderBank);
-    cashOrder.setClientTypeFK(message.isClientTypeFK());
+    cashOrder.setClientTypeFk(message.isClientTypeFK());
     cashOrder.setUserPosition(message.getUserPosition());
   }
 
@@ -137,7 +141,7 @@ public class CashOrderAdapter extends AsfsAdapter {
     cashOrder.setResponseCode(message.getResponseCode());
     cashOrder.setResponseMsg(message.getResponseMsg());
     cashOrder.setCashOrderINum(message.getCashOrderINum());
-    cashOrder.setCashOrderStatus(cashOrderStatus(message.getCashOrderStatus()));
+    cashOrder.setCashOrderStatus(cashOrderStatusType(message.getCashOrderStatus()));
     cashOrder.setCashOrderType(cashOrderType(message.getCashOrderType()));
   }
 
@@ -160,7 +164,8 @@ public class CashOrderAdapter extends AsfsAdapter {
     request.setHeaderInfo(headerInfo());
     request.setSrvUpdCashOrderRqMessage(new SrvUpdStCashOrderRq.SrvUpdCashOrderRqMessage());
     request.getSrvUpdCashOrderRqMessage().setCashOrderId(cashOrder.getCashOrderId());
-    request.getSrvUpdCashOrderRqMessage().setCashOrderStatus(cashOrderStatusType(cashOrder.getCashOrderStatus()));
+    request.getSrvUpdCashOrderRqMessage()
+        .setCashOrderStatus(cashOrderStatusType(cashOrder.getCashOrderStatus()));
     return request;
   }
 

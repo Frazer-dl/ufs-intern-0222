@@ -4,6 +4,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.config.property.HazelcastServerProperties;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
 
@@ -56,6 +58,11 @@ public class HazelcastMockServer {
    * Пакеты операций по ИНН клиента.
    */
   @Getter private IMap<String, Long> packageIdByInn;
+  /**
+   * Пакеты операций по кассовым ордерам.
+   */
+  @Getter
+  private IMap<Date, Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage>> cashOrders;
 
   /**
    * Конструктор бина.
@@ -100,6 +107,7 @@ public class HazelcastMockServer {
     taskStatuses = instance.getMap("taskStatuses");
     packageById = instance.getMap("packageById");
     packageIdByInn = instance.getMap("packageIdByInn");
+    cashOrders = instance.getMap("cashOrders");
   }
 
   /**

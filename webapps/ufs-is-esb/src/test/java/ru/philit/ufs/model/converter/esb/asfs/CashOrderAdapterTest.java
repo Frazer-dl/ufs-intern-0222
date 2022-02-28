@@ -18,7 +18,7 @@ import ru.philit.ufs.model.entity.oper.CashOrderType;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.user.Subbranch;
 
-public class CashOrderAdapterTest extends AsfsAdapterTest{
+public class CashOrderAdapterTest extends AsfsAdapterTest {
 
   private static final String FIX_UUID = "a55ed415-3976-41f7-916c-4c17ca79e969";
 
@@ -38,7 +38,7 @@ public class CashOrderAdapterTest extends AsfsAdapterTest{
     cashOrder.setAmount(BigDecimal.TEN);
     cashOrder.setCashOrderINum("55555");
     cashOrder.setUserFullName("Ivanov Ivan Ivanovich");
-    cashOrder.setFDestLEName("123");
+    cashOrder.setFdestLeName("123");
     cashOrder.setCashOrderType(CashOrderType.KO_1);
     cashOrder.setCashSymbols(new ArrayList<>());
     CashSymbol cashSymbol = new CashSymbol();
@@ -68,11 +68,11 @@ public class CashOrderAdapterTest extends AsfsAdapterTest{
     cashOrder.setSenderBank(senderBank);
     cashOrder.setResponseCode("200");
     cashOrder.setResponseMsg("message");
-    cashOrder.setClientTypeFK(false);
+    cashOrder.setClientTypeFk(false);
     cashOrder.setUserPosition("position");
     Representative repData = new Representative();
     repData.setAddress("Moscow, Arbat 12");
-    repData.setBirthDate(new Date(1989, 05, 07));
+    repData.setBirthDate(date(1989, 5, 7, 12, 33));
     repData.setInn("1234567890");
     repData.setPlaceOfBirth("Moscow");
     repData.setFirstName("Ivan");
@@ -84,7 +84,8 @@ public class CashOrderAdapterTest extends AsfsAdapterTest{
 
     response1 = new SrvCreateCashOrderRs();
     response1.setHeaderInfo(headerInfo(FIX_UUID));
-    response1.setSrvCreateCashOrderRsMessage(new SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage());
+    response1.setSrvCreateCashOrderRsMessage(
+        new SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage());
     response1.getSrvCreateCashOrderRsMessage().setAccountId("12344");
     response1.getSrvCreateCashOrderRsMessage().setAmount(BigDecimal.valueOf(1000));
     response1.getSrvCreateCashOrderRsMessage().setCashOrderStatus(CashOrderStatusType.CREATED);
@@ -107,10 +108,12 @@ public class CashOrderAdapterTest extends AsfsAdapterTest{
     cashSymbolItem1.setCashSymbolAmount(BigDecimal.TEN);
     cashSymbols1.getCashSymbolItem().add(cashSymbolItem1);
     response1.getSrvCreateCashOrderRsMessage().setCashSymbols(cashSymbols1);
-    response1.getSrvCreateCashOrderRsMessage().setCreatedDttm(xmlCalendar(2022, 2, 25, 12, 43));
+    response1.getSrvCreateCashOrderRsMessage()
+        .setCreatedDttm(xmlCalendar(2022, 2, 25, 12, 43));
     response1.getSrvCreateCashOrderRsMessage().setINN("1234567890");
     response1.getSrvCreateCashOrderRsMessage().setCashOrderINum("55555");
-    response1.getSrvCreateCashOrderRsMessage().setCashOrderType(ru.philit.ufs.model.entity.esb.asfs.CashOrderType.KO_1);
+    response1.getSrvCreateCashOrderRsMessage()
+        .setCashOrderType(ru.philit.ufs.model.entity.esb.asfs.CashOrderType.KO_1);
     response1.getSrvCreateCashOrderRsMessage().setResponseMsg("200");
     response1.getSrvCreateCashOrderRsMessage().setResponseCode("message");
 
@@ -131,7 +134,8 @@ public class CashOrderAdapterTest extends AsfsAdapterTest{
     SrvCreateCashOrderRq request = CashOrderAdapter.requestCreateCashOrder(cashOrder);
     assertHeaderInfo(headerInfo());
     Assert.assertNotNull(request.getSrvCreateCashOrderRqMessage());
-    Assert.assertEquals(request.getSrvCreateCashOrderRqMessage().getAccountId(), cashOrder.getAccountId());
+    Assert.assertEquals(request.getSrvCreateCashOrderRqMessage().getAccountId(),
+        cashOrder.getAccountId());
   }
 
   @Test
@@ -140,21 +144,26 @@ public class CashOrderAdapterTest extends AsfsAdapterTest{
     assertHeaderInfo(headerInfo());
     Assert.assertNotNull(request.getSrvUpdCashOrderRqMessage());
     Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderId(), "12345");
-    Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderStatus(), CashOrderStatusType.CREATED);
+    Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderStatus(),
+        CashOrderStatusType.CREATED);
   }
 
   @Test
   public void testConverterCreateCashOrder() {
     CashOrder cashOrder = CashOrderAdapter.convert(response1);
     assertHeaderInfo(cashOrder, FIX_UUID);
-    Assert.assertEquals(cashOrder.getAccountId(), response1.getSrvCreateCashOrderRsMessage().getAccountId());
-    Assert.assertEquals(cashOrder.getCashOrderId(), response1.getSrvCreateCashOrderRsMessage().getCashOrderId());
+    Assert.assertEquals(cashOrder.getAccountId(), response1.getSrvCreateCashOrderRsMessage()
+        .getAccountId());
+    Assert.assertEquals(cashOrder.getCashOrderId(), response1.getSrvCreateCashOrderRsMessage()
+        .getCashOrderId());
   }
+
   @Test
   public void testConverterUpdateCashOrder() {
     CashOrder cashOrder = CashOrderAdapter.convert(response2);
     assertHeaderInfo(cashOrder, FIX_UUID);
-    Assert.assertEquals(cashOrder.getCashOrderId(), response2.getSrvUpdCashOrderRsMessage().getCashOrderId());
-    Assert.assertEquals(cashOrder.getCashOrderINum(), response2.getSrvUpdCashOrderRsMessage().getCashOrderINum());
+    Assert.assertEquals(cashOrder.getCashOrderId(), response2.getSrvUpdCashOrderRsMessage()
+        .getCashOrderId());
+    Assert.assertEquals(cashOrder.getCashOrderStatus(), CashOrderStatus.COMMITTED);
   }
 }

@@ -37,8 +37,8 @@ public class CashOrder extends ExternalEntity {
   private String operationId;
   private String legalEntityShortName;
   private List<CashSymbol> cashSymbols;
-  private Boolean clientTypeFK;
-  private String fDestLEName;
+  private Boolean clientTypeFk;
+  private String fdestLeName;
   private String userLogin;
   private String userFullName;
   private String userPosition;

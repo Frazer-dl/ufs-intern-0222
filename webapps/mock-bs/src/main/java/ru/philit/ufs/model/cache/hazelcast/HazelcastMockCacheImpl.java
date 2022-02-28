@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.IMap;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -23,6 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.model.cache.MockCache;
+import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage;
 import ru.philit.ufs.model.entity.esb.eks.PkgStatusType;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
@@ -171,6 +176,52 @@ public class HazelcastMockCacheImpl implements MockCache {
       }
     }
     return targetLists;
+  }
+
+  @Override
+  public void crCashOrder(String cashOrderId, SrvCreateCashOrderRsMessage response, Date day) {
+    saveCashOrders(hazelcastServer.getCashOrders(), day, cashOrderId, response);
+  }
+
+  @Override
+  public void updStCashOrder(String cashOrderId, CashOrderStatusType statusType) {
+    AtomicReference<SrvCreateCashOrderRsMessage> cashOrder
+        = new AtomicReference<>(new SrvCreateCashOrderRsMessage());
+    IMap<Date, Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage>> cashOrders
+        = hazelcastServer.getCashOrders();
+    cashOrders.values().forEach(map -> {
+      if (map.containsKey(cashOrderId)) {
+        cashOrder.set(map.get(cashOrderId));
+      }
+    });
+    cashOrder.get().setCashOrderStatus(statusType);
+    Date date = cashOrder.get().getCreatedDttm().toGregorianCalendar().getTime();
+    saveCashOrders(cashOrders, date, cashOrderId, cashOrder.get());
+  }
+
+  private void saveCashOrders(IMap<Date, Map<String,
+      SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage>> cashOrders, Date date,
+      String cashOrderId, SrvCreateCashOrderRsMessage response) {
+    if (!cashOrders.containsKey(date)) cashOrders.put(date, new HashMap<>());
+    Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage> map = cashOrders.get(date);
+    map.put(cashOrderId, response);
+    cashOrders.put(date, map);
+  }
+
+  @Override
+  public Boolean checkOverLimit(String accountId, Date date) {
+    if (date == null) date = new Date();
+    BigDecimal userAmount = BigDecimal.ZERO;
+    if (hazelcastServer.getCashOrders().containsKey(date)) {
+      Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage> map
+          = hazelcastServer.getCashOrders().get(date);
+      for (SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage co : map.values()) {
+        if (co.getAccountId().equals(accountId)) {
+          userAmount.add(co.getAmount());
+        }
+      }
+    }
+    return userAmount.compareTo(BigDecimal.valueOf(600000)) <= 0;
   }
 
   private List<String> searchTasks(Map<Long, String> tasks, PkgTaskStatusType taskStatus,

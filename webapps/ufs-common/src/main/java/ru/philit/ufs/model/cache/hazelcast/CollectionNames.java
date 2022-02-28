@@ -49,6 +49,10 @@ public final class CollectionNames {
   public static final String OPERATOR_BY_ID_MAP = "operatorByIdMap";
   public static final String CASH_SYMBOLS_MAP = "cashSymbolsMap";
 
+  public static final String CASH_ORDER_MAP = "cashOderMap";
+  public static final String OVER_LIMIT_MAP = "overLimitMap";
+  public static final String WORKPLACE_MAP = "workplaceMap";
+
   private CollectionNames() {
   }
 

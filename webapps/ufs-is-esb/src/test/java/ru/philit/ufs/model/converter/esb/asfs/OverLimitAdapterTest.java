@@ -11,7 +11,7 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs.SrvCheckOverLimitRsMessage;
 import ru.philit.ufs.model.entity.oper.Limit;
 
-public class OverLimitAdapterTest extends AsfsAdapterTest{
+public class OverLimitAdapterTest extends AsfsAdapterTest {
 
   private static final String FIX_UUID = "a55ed415-3976-41f7-916c-4c17ca79e969";
 
@@ -41,9 +41,11 @@ public class OverLimitAdapterTest extends AsfsAdapterTest{
     SrvCheckOverLimitRq request = OverLimitAdapter.requestOverLimit(limit);
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvCheckOverLimitRqMessage());
-    Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getUserLogin(), limit.getUserLogin());
+    Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getUserLogin(),
+        limit.getUserLogin());
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getAmount(), limit.getAmount());
-    Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().isTobeIncreased(), limit.isTobeIncreased());
+    Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().isTobeIncreased(),
+        limit.isTobeIncreased());
   }
 
   @Test

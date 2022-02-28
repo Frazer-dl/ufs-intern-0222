@@ -30,8 +30,10 @@ import ru.philit.ufs.model.entity.common.LocalKey;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
+import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.Limit;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
@@ -41,6 +43,7 @@ import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex1;
 import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.Operator;
+import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.model.server.HazelcastServer;
 import ru.philit.ufs.model.server.MockIMap;
 import ru.philit.ufs.model.server.MockIQueue;
@@ -53,6 +56,7 @@ public class ResponseListenerTest {
   private static final String LEGAL_ENTITY_ID = "112";
   private static final String FIX_UUID = "4f04ce04-ac37-4ec9-9923-6a9a5a882a97";
   private static final String OVN_UID = "121212";
+  private static final String WORKPLACE_ID = "1";
 
   private final IQueue<ExternalEntity> responseQueue = new MockIQueue<>(5);
   private final IMap<String, ExternalEntityRequest> requestMap = new MockIMap<>();
@@ -103,6 +107,13 @@ public class ResponseListenerTest {
   private final IMap<LocalKey<CashSymbolRequest>, List<CashSymbol>> cashSymbolsMap =
       new MockIMap<>();
 
+  private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderIMap = new MockIMap<>();
+
+  private final IMap<LocalKey<String>, Workplace> workplaceIMap = new MockIMap<>();
+
+  private final IMap<LocalKey<Limit>, ExternalEntityContainer<Boolean>> overLimitMap =
+      new MockIMap<>();
+
   @Mock
   private HazelcastServer hazelcastServer;
 
@@ -146,6 +157,9 @@ public class ResponseListenerTest {
     when(hazelcastServer.getRepresentativeByCardMap()).thenReturn(representativeByCardMap);
     when(hazelcastServer.getOperatorByUserMap()).thenReturn(operatorByUserMap);
     when(hazelcastServer.getCashSymbolsMap()).thenReturn(cashSymbolsMap);
+    when(hazelcastServer.getCashOrderMap()).thenReturn(cashOrderIMap);
+    when(hazelcastServer.getWorkplaceMap()).thenReturn(workplaceIMap);
+    when(hazelcastServer.getOverLimitMap()).thenReturn(overLimitMap);
     responseListener.init();
   }
 
@@ -1259,5 +1273,73 @@ public class ResponseListenerTest {
     responseQueue.add(externalEntity);
     // then
     Assert.assertFalse(responseFlagMap.containsKey(request));
+  }
+
+  @Test
+  public void testItemAdded_CashOrder() throws Exception {
+    // given
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.CREATE_CASH_ORDER);
+    CashOrder cashOrder = new CashOrder();
+    request.setRequestData(cashOrder);
+
+    CashOrder order = new CashOrder();
+    order.setRequestUid(FIX_UUID);
+    order.setReceiveDate(new Date());
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(order);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<CashOrder> localKey = new LocalKey<>(SESSION_ID, cashOrder);
+    Assert.assertTrue(cashOrderIMap.containsKey(localKey));
+    Assert.assertEquals(cashOrderIMap.get(localKey), order);
+  }
+
+  @Test
+  public void testItemAdded_WorkPlace() throws Exception {
+    // given
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.GET_WORKPLACE_INFO);
+    request.setRequestData(WORKPLACE_ID);
+    Workplace container = new Workplace();
+    container.setRequestUid(FIX_UUID);
+    container.setReceiveDate(new Date());
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(container);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<String> localKey = new LocalKey<>(SESSION_ID, WORKPLACE_ID);
+    Assert.assertTrue(workplaceIMap.containsKey(localKey));
+  }
+
+  @Test
+  public void testItemAdded_OverLimit() throws Exception {
+    // given
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.CHECK_OVER_LIMIT);
+
+    Limit requestKey = new Limit();
+    requestKey.setUserLogin("login");
+    requestKey.setAmount(BigDecimal.valueOf(10000));
+    request.setRequestData(requestKey);
+
+    ExternalEntityContainer<Boolean> container = new ExternalEntityContainer<>();
+    container.setRequestUid(FIX_UUID);
+    container.setReceiveDate(new Date());
+    container.setData(true);
+
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(container);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Limit> localKey = new LocalKey<>(SESSION_ID, requestKey);
+    Assert.assertTrue(overLimitMap.containsKey(localKey));
+    Assert.assertEquals(overLimitMap.get(localKey), container);
   }
 }

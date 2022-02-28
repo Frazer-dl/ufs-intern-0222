@@ -22,8 +22,7 @@ public class WorkPlaceAdapter extends AsfsAdapter {
     workplace.setCategoryLimits(new ArrayList<>());
     if (message.getWorkPlaceOperationTypeLimit() != null) {
       for (WorkPlaceOperationTypeLimit.OperationTypeLimitItem item:
-          message.getWorkPlaceOperationTypeLimit()
-              .getOperationTypeLimitItem()) {
+          message.getWorkPlaceOperationTypeLimit().getOperationTypeLimitItem()) {
         OperationTypeLimit operationTypeLimit = new OperationTypeLimit();
         operationTypeLimit.setCategoryId(item.getOperationCategory().toString());
         operationTypeLimit.setLimit(item.getOperationLimit());
@@ -39,7 +38,8 @@ public class WorkPlaceAdapter extends AsfsAdapter {
   public static SrvGetWorkPlaceInfoRq requestGetWorkPlace(String workPlaceId) {
     SrvGetWorkPlaceInfoRq request = new SrvGetWorkPlaceInfoRq();
     request.setHeaderInfo(headerInfo());
-    request.setSrvGetWorkPlaceInfoRqMessage(new SrvGetWorkPlaceInfoRq.SrvGetWorkPlaceInfoRqMessage());
+    request.setSrvGetWorkPlaceInfoRqMessage(
+        new SrvGetWorkPlaceInfoRq.SrvGetWorkPlaceInfoRqMessage());
     request.getSrvGetWorkPlaceInfoRqMessage().setWorkPlaceUId(workPlaceId);
     return request;
   }

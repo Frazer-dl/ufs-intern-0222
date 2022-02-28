@@ -12,7 +12,7 @@ import ru.philit.ufs.model.entity.esb.asfs.HeaderInfoType;
 public class AsfsAdapter extends CommonAdapter {
 
   public static final String REQUEST_SYSTEM = "ufs";
-  public static final String RESPONSE_SYSTEM = "eks";
+  public static final String RESPONSE_SYSTEM = "asfs";
 
   /**
    * Создаёт HeaderInfo для транспортного объекта интеграции с АСФС.

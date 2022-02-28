@@ -8,8 +8,7 @@ import java.util.Map;
 public enum CashOrderStatus {
 
   CREATED("Created", "Создан"),
-  REJECTED("Rejected", "Отклонён"),
-  COMPLETED("Completed", "Выполнен");
+  COMMITTED("Committed", "Переданный");
 
   private static final ImmutableMap<String, CashOrderStatus> CODES_MAP;
 
