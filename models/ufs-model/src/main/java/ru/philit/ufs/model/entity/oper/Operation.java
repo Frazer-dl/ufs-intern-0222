@@ -24,5 +24,5 @@ public class Operation extends ExternalEntity {
   private Date createdDate;
   private Date committedDate;
   private String rollbackReason;
-
+  private String cashOrderId;
 }
