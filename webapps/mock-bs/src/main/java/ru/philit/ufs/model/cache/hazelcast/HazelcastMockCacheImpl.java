@@ -202,7 +202,9 @@ public class HazelcastMockCacheImpl implements MockCache {
   private void saveCashOrders(IMap<Date, Map<String,
       SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage>> cashOrders, Date date,
       String cashOrderId, SrvCreateCashOrderRsMessage response) {
-    if (!cashOrders.containsKey(date)) cashOrders.put(date, new HashMap<>());
+    if (!cashOrders.containsKey(date)) {
+      cashOrders.put(date, new HashMap<>());
+    }
     Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage> map = cashOrders.get(date);
     map.put(cashOrderId, response);
     cashOrders.put(date, map);
@@ -210,7 +212,9 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   @Override
   public Boolean checkOverLimit(String accountId, Date date) {
-    if (date == null) date = new Date();
+    if (date == null) {
+      date = new Date();
+    }
     BigDecimal userAmount = BigDecimal.ZERO;
     if (hazelcastServer.getCashOrders().containsKey(date)) {
       Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage> map

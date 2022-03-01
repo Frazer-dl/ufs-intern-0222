@@ -1,5 +1,6 @@
 package ru.philit.ufs.web.controller;
 
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -13,6 +14,8 @@ import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.web.mapping.UserMapper;
 import ru.philit.ufs.web.provider.UserProvider;
 import ru.philit.ufs.web.view.GetOperatorResp;
+import ru.philit.ufs.web.view.GetOverLimitReq;
+import ru.philit.ufs.web.view.GetOverLimitResp;
 import ru.philit.ufs.web.view.GetWorkplaceResp;
 import ru.philit.ufs.web.view.LoginUserReq;
 import ru.philit.ufs.web.view.LoginUserResp;
@@ -79,4 +82,10 @@ public class UserController {
     return new GetWorkplaceResp().withSuccess(mapper.asDto(workplace));
   }
 
+  @RequestMapping(value = "/overLimit", method = RequestMethod.POST)
+  public GetOverLimitResp getCheckOverLimit(@RequestBody GetOverLimitReq request,
+      ClientInfo clientInfo) {
+    boolean flag = provider.checkOverLimit(mapper.asDto(request.getAmount()), clientInfo);
+    return new GetOverLimitResp().withSuccess(flag);
+  }
 }

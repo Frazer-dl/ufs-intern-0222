@@ -8,18 +8,22 @@ import static ru.philit.ufs.model.entity.request.RequestType.ADD_OPER_TASK;
 import static ru.philit.ufs.model.entity.request.RequestType.CARD_INDEX_ELEMENTS_BY_ACCOUNT;
 import static ru.philit.ufs.model.entity.request.RequestType.CASH_SYMBOL;
 import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OPER_PACKAGE;
+import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OVER_LIMIT;
 import static ru.philit.ufs.model.entity.request.RequestType.COUNT_COMMISSION;
+import static ru.philit.ufs.model.entity.request.RequestType.CREATE_CASH_ORDER;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPER_PACKAGE;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OPER_TASKS;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN_LIST;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_REPRESENTATIVE_BY_CARD;
+import static ru.philit.ufs.model.entity.request.RequestType.GET_WORKPLACE_INFO;
 import static ru.philit.ufs.model.entity.request.RequestType.LEGAL_ENTITY_BY_ACCOUNT;
 import static ru.philit.ufs.model.entity.request.RequestType.OPERATOR_BY_ID;
 import static ru.philit.ufs.model.entity.request.RequestType.OPERATOR_BY_USER;
 import static ru.philit.ufs.model.entity.request.RequestType.OPER_TYPES_BY_ROLE;
 import static ru.philit.ufs.model.entity.request.RequestType.SEARCH_REPRESENTATIVE;
 import static ru.philit.ufs.model.entity.request.RequestType.SEIZURES_BY_ACCOUNT;
+import static ru.philit.ufs.model.entity.request.RequestType.UPDATE_CASH_ORDER_STATUS;
 import static ru.philit.ufs.model.entity.request.RequestType.UPDATE_OPER_TASK;
 
 import com.google.common.collect.Iterables;
@@ -46,8 +50,11 @@ import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.common.LocalKey;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
+import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderStatus;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.Limit;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -59,6 +66,7 @@ import ru.philit.ufs.model.entity.oper.PaymentOrderCardIndex2;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.service.AuditService;
 import ru.philit.ufs.web.exception.UserNotFoundException;
 
@@ -231,6 +239,32 @@ public class HazelcastCacheImpl
   }
 
   @Override
+  public CashOrder createCashOrder(CashOrder cashOrder, ClientInfo clientInfo) {
+    return requestData(
+        cashOrder, client.getCashOrderMap(), CREATE_CASH_ORDER, clientInfo
+    );
+  }
+
+  @Override
+  public CashOrder updCashOrder(CashOrder cashOrder, ClientInfo clientInfo) {
+    return requestData(
+        cashOrder, client.getCashOrderMap(), UPDATE_CASH_ORDER_STATUS, clientInfo
+    );
+  }
+
+  @Override
+  public void addCashOrderToCashBook(CashOrder cashOrder) {
+    if (cashOrder != null && cashOrder.getCashOrderStatus().equals(CashOrderStatus.COMMITTED)) {
+      client.getCashBookMap().put(cashOrder.getCashOrderId(), cashOrder);
+    }
+  }
+
+  @Override
+  public List<CashOrder> getCashBook() {
+    return (List<CashOrder>) client.getCashBookMap().values();
+  }
+
+  @Override
   public User getUser(String sessionId) {
     if (!client.getUserBySessionMap().containsKey(sessionId)) {
       throw new UserNotFoundException("Session with id is not found: " + sessionId);
@@ -260,6 +294,18 @@ public class HazelcastCacheImpl
   @Override
   public boolean removeUser(String sessionId) {
     return client.getUserBySessionMap().remove(sessionId) != null;
+  }
+
+  @Override
+  public Workplace getWorkplace(String workPlaceId, ClientInfo clientInfo) {
+    return requestData(workPlaceId, client.getWorkplaceMap(), GET_WORKPLACE_INFO, clientInfo);
+  }
+
+  @Override
+  public Boolean checkOverLimit(Limit limit, ClientInfo clientInfo) {
+    ExternalEntityContainer<Boolean> container = requestData(limit, client.getOverLimitMap(),
+        CHECK_OVER_LIMIT, clientInfo);
+    return container.getData();
   }
 
   @Override

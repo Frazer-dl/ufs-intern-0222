@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.philit.ufs.web.dto.BaseRequest;
 import ru.philit.ufs.web.dto.CardDepositDto;
+import ru.philit.ufs.web.dto.CashOrderDto;
 
 /**
  * Запрос для операции {@link ru.philit.ufs.web.controller.OperationController#continueWithUrm}
@@ -23,5 +24,9 @@ public class AddTaskToPackageReq extends BaseRequest {
    * Взнос наличных на кредитную карту.
    */
   private CardDepositDto deposit;
+  /**
+   * Идентификатор кассового ордера.
+   */
+  private CashOrderDto cashOrderDto;
 
 }

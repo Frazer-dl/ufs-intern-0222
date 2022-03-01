@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationTask;
@@ -52,7 +53,8 @@ public class OperationControllerTest extends RestControllerTest {
     String requestJson = toRequest(request);
 
     when(provider.addActiveDepositTask(
-        anyString(), any(OperationTaskCardDeposit.class), any(ClientInfo.class)
+        anyString(), any(CashOrder.class), any(OperationTaskCardDeposit.class),
+        any(ClientInfo.class)
     )).thenReturn(new OperationPackage());
 
     String urlTemplate = "/operation/continueUrm";
@@ -63,7 +65,7 @@ public class OperationControllerTest extends RestControllerTest {
     assertNotNull(response.getData());
 
     verify(provider, times(1)).addActiveDepositTask(
-        anyString(), any(OperationTaskCardDeposit.class), any(ClientInfo.class)
+        anyString(),any(CashOrder.class), any(OperationTaskCardDeposit.class), any(ClientInfo.class)
     );
     verifyNoMoreInteractions(provider);
   }
@@ -76,7 +78,8 @@ public class OperationControllerTest extends RestControllerTest {
     String requestJson = toRequest(request);
 
     when(provider.addForwardedDepositTask(
-        anyString(), any(OperationTaskCardDeposit.class), any(ClientInfo.class)
+        anyString(), any(CashOrder.class), any(OperationTaskCardDeposit.class),
+        any(ClientInfo.class)
     )).thenReturn(new OperationPackage());
 
     String urlTemplate = "/operation/continueCash";
@@ -87,7 +90,8 @@ public class OperationControllerTest extends RestControllerTest {
     assertNotNull(response.getData());
 
     verify(provider, times(1)).addForwardedDepositTask(
-        anyString(), any(OperationTaskCardDeposit.class), any(ClientInfo.class)
+        anyString(), any(CashOrder.class), any(OperationTaskCardDeposit.class),
+        any(ClientInfo.class)
     );
     verifyNoMoreInteractions(provider);
   }
@@ -109,7 +113,7 @@ public class OperationControllerTest extends RestControllerTest {
     opPackage.setToCardDeposits(Arrays.asList(task1, task2));
 
     when(provider.confirmOperation(
-        anyLong(), anyLong(), anyString(), anyString(), any(ClientInfo.class)
+        anyLong(), anyLong(), anyString(), any(CashOrder.class), anyString(), any(ClientInfo.class)
     )).thenReturn(new Operation());
 
     String responseJson = performAndGetContent(post("/operation/confirm").content(requestJson));
@@ -119,7 +123,7 @@ public class OperationControllerTest extends RestControllerTest {
     assertNotNull(response.getData());
 
     verify(provider, times(1)).confirmOperation(
-        anyLong(), anyLong(), anyString(), anyString(), any(ClientInfo.class)
+        anyLong(), anyLong(), anyString(), any(CashOrder.class), anyString(), any(ClientInfo.class)
     );
     verifyNoMoreInteractions(provider);
   }

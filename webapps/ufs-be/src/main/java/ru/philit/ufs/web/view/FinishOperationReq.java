@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import ru.philit.ufs.web.dto.BaseRequest;
+import ru.philit.ufs.web.dto.CashOrderDto;
 
 /**
  * Запрос для операций
@@ -32,5 +33,9 @@ public class FinishOperationReq extends BaseRequest {
    * Код типа операции.
    */
   private String operationTypeCode;
+  /**
+   * Идентификатор кассового ордера.
+   */
+  private CashOrderDto cashOrderDto;
 
 }

@@ -1,6 +1,7 @@
 package ru.philit.ufs.model.cache;
 
 import java.util.List;
+import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -27,5 +28,13 @@ public interface OperationCache {
   OperationPackage updateTasksInPackage(OperationPackage request, ClientInfo clientInfo);
 
   List<OperationPackage> getTasksInPackages(OperationTasksRequest request, ClientInfo clientInfo);
+
+  CashOrder createCashOrder(CashOrder cashOrder, ClientInfo clientInfo);
+
+  CashOrder updCashOrder(CashOrder cashOrder, ClientInfo clientInfo);
+
+  void addCashOrderToCashBook(CashOrder cashOrder);
+
+  List<CashOrder> getCashBook();
 
 }

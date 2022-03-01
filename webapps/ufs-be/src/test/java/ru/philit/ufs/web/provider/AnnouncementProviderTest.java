@@ -131,8 +131,6 @@ public class AnnouncementProviderTest {
   @Test
   public void testGetCommission() throws Exception {
     // when
-    doNothing().when(userProvider)
-        .checkWorkplaceIncreasedAmount(any(BigDecimal.class), any(ClientInfo.class));
     when(cache.getCommission(any(AccountOperationRequest.class), any(ClientInfo.class)))
         .thenReturn(BigDecimal.ONE);
     provider.getCommission(ACCOUNT_ID, AMOUNT, TYPE_CODE, CLIENT_INFO);

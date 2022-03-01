@@ -193,11 +193,11 @@ public class HazelcastMockCacheImplTest {
     SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage co =
         new SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage();
     String cashOrderId = "12345";
-    Date date = new Date();
     co.setCashOrderId(cashOrderId);
     co.setCashOrderStatus(CashOrderStatusType.CREATED);
     co.setAmount(BigDecimal.valueOf(200000));
     co.setAccountId("1");
+    Date date = new Date();
     mockCache.crCashOrder(cashOrderId, co, date);
     Assert.assertTrue(mockCache.checkOverLimit(co.getAccountId(), date));
   }

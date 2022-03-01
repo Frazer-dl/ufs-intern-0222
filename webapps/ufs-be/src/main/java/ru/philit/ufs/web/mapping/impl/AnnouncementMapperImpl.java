@@ -7,8 +7,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
+import ru.philit.ufs.model.entity.oper.OperationTypeLimit;
+import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.web.dto.AnnouncementDto;
 import ru.philit.ufs.web.dto.CashSymbolDto;
+import ru.philit.ufs.web.dto.OperationTypeLimitDto;
+import ru.philit.ufs.web.dto.WorkplaceDto;
 import ru.philit.ufs.web.mapping.AnnouncementMapper;
 
 @Component
@@ -64,6 +68,33 @@ public class AnnouncementMapperImpl extends CommonMapperImpl implements Announce
   }
 
   @Override
+  public WorkplaceDto asDto(Workplace in) {
+    if (in == null) {
+      return null;
+    }
+    WorkplaceDto out = new WorkplaceDto();
+
+    out.setSubbranchCode(in.getSubbranchCode());
+    out.setCashboxDeviceId(in.getCashboxDeviceId());
+    out.setCashboxDeviceType(in.getCashboxDeviceType());
+    out.setCurrencyType(in.getCurrencyType());
+    out.setAmount(asDto(in.getAmount()));
+    out.setLimit(asDto(in.getLimit()));
+    out.setCategoryLimits(asLimitDto(in.getCategoryLimits()));
+
+    return out;
+  }
+
+  private OperationTypeLimitDto asDto(OperationTypeLimit in) {
+    OperationTypeLimitDto out = new OperationTypeLimitDto();
+
+    out.setCategoryId(in.getCategoryId());
+    out.setLimit(asDto(in.getLimit()));
+
+    return out;
+  }
+
+  @Override
   public List<AnnouncementDto> asAnnouncementDto(List<CashDepositAnnouncement> in) {
     if (in == null) {
       return Collections.emptyList();
@@ -84,6 +115,18 @@ public class AnnouncementMapperImpl extends CommonMapperImpl implements Announce
 
     for (CashSymbol symbol : in) {
       out.add(asDto(symbol));
+    }
+    return out;
+  }
+
+  private List<OperationTypeLimitDto> asLimitDto(List<OperationTypeLimit> in) {
+    if (in == null) {
+      return Collections.emptyList();
+    }
+    List<OperationTypeLimitDto> out = new ArrayList<>();
+
+    for (OperationTypeLimit typeLimit : in) {
+      out.add(asDto(typeLimit));
     }
     return out;
   }

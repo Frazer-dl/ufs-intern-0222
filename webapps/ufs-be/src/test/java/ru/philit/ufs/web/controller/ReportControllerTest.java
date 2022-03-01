@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -17,8 +19,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import ru.philit.ufs.model.entity.account.IdentityDocument;
+import ru.philit.ufs.model.entity.account.IdentityDocumentType;
 import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
+import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderStatus;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationTask;
@@ -28,11 +34,16 @@ import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.Subbranch;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.web.dto.CashOrderDto;
 import ru.philit.ufs.web.dto.OperationJournalDto;
 import ru.philit.ufs.web.mapping.OperationJournalMapper;
+import ru.philit.ufs.web.mapping.OperationMapper;
 import ru.philit.ufs.web.mapping.impl.OperationJournalMapperImpl;
+import ru.philit.ufs.web.mapping.impl.OperationMapperImpl;
 import ru.philit.ufs.web.provider.ReportProvider;
 import ru.philit.ufs.web.provider.RepresentativeProvider;
+import ru.philit.ufs.web.view.GetCashBookReq;
+import ru.philit.ufs.web.view.GetCashBookResp;
 import ru.philit.ufs.web.view.GetOperationJournalReq;
 import ru.philit.ufs.web.view.GetOperationJournalResp;
 
@@ -44,6 +55,8 @@ public class ReportControllerTest extends RestControllerTest {
   private RepresentativeProvider representativeProvider;
   @Spy
   private OperationJournalMapper operationJournalMapper = new OperationJournalMapperImpl();
+  @Spy
+  private OperationMapper operationMapper = new OperationMapperImpl();
 
   /**
    * Set up test controller.
@@ -52,7 +65,7 @@ public class ReportControllerTest extends RestControllerTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
     standaloneSetup(new ReportController(reportProvider, representativeProvider,
-        operationJournalMapper));
+        operationJournalMapper, operationMapper));
   }
 
   @Test
@@ -110,5 +123,44 @@ public class ReportControllerTest extends RestControllerTest {
     //assertEquals(controlDto.getOperation().getAmount(), "1400");
     assertNotNull(controlDto.getRepresentative());
     //assertEquals(controlDto.getRepresentative().getFullName(), "Петров Петр Петрович");
+  }
+
+  @Test
+  public void testGetCasbook() throws Exception {
+    GetCashBookReq request = new GetCashBookReq();
+    request.setCashOrderId("12345");
+
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setCashOrderId("12345");
+    cashOrder.setAccountId("54321");
+    cashOrder.setAccount20202Num("875463");
+    cashOrder.setWorkPlaceUId("987654");
+    cashOrder.setAmount(BigDecimal.valueOf(1000));
+    cashOrder.setCashOrderStatus(CashOrderStatus.COMMITTED);
+    cashOrder.setCashOrderINum("0000000");
+    cashOrder.setCurrencyType("RUB");
+    Representative representative = new Representative();
+    representative.setLastName("Петров");
+    representative.setFirstName("Петр");
+    representative.setPatronymic("Петрович");
+    IdentityDocument id = new IdentityDocument();
+    id.setType(IdentityDocumentType.PASSPORT);
+    representative.setIdentityDocuments(Collections.singletonList(id));
+    cashOrder.setRepresentative(representative);
+    Subbranch subbranch = new Subbranch("1234", "13", "8593", null, "0102", "1385930102", 1L,
+        "0278000222", "044525225", "ПАО \"Сбербанк\"", "30165465190064106565",
+        "location1", "locationType1");
+    cashOrder.setRecipientBank(subbranch);
+
+    when(reportProvider.getCashBook("12345"))
+        .thenReturn(Collections.singletonList(cashOrder));
+
+    String responseJson = performAndGetContent(post("/report/cashBook")
+        .content(toRequest(request)));
+
+    GetCashBookResp response = toResponse(responseJson, GetCashBookResp.class);
+    assertNotNull(response.getData());
+    assertEquals(response.getData().size(), 1);
+    assertEquals(((List)response.getData()).get(0).getClass(), CashOrderDto.class);
   }
 }

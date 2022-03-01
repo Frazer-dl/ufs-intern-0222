@@ -33,5 +33,9 @@ public class CardDepositDto extends AnnouncementDto {
    * Идентификатор представителя.
    */
   private String representativeId;
+  /**
+   * Кассовый ордер.
+   */
+  private CashOrderDto cashOrderDto;
 
 }

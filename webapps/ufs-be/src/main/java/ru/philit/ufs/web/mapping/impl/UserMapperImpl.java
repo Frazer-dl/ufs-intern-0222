@@ -1,5 +1,6 @@
 package ru.philit.ufs.web.mapping.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,6 +85,11 @@ public class UserMapperImpl extends CommonMapperImpl implements UserMapper {
     return out;
   }
 
+  @Override
+  public BigDecimal asDto(String in) {
+    return asDecimalEntity(in);
+  }
+
   private List<OperationTypeLimitDto> asLimitDto(List<OperationTypeLimit> in) {
     if (in == null) {
       return Collections.emptyList();
@@ -95,4 +101,5 @@ public class UserMapperImpl extends CommonMapperImpl implements UserMapper {
     }
     return out;
   }
+
 }

@@ -8,6 +8,9 @@ import org.springframework.util.StringUtils;
 import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.OperationCache;
 import ru.philit.ufs.model.entity.account.Representative;
+import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderStatus;
+import ru.philit.ufs.model.entity.oper.CashOrderType;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -16,6 +19,7 @@ import ru.philit.ufs.model.entity.oper.OperationTaskCardDeposit;
 import ru.philit.ufs.model.entity.oper.OperationTaskStatus;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
+import ru.philit.ufs.util.UuidUtils;
 import ru.philit.ufs.web.exception.InvalidDataException;
 
 /**
@@ -43,36 +47,50 @@ public class OperationProvider {
    * Добавление новой активной задачи.
    *
    * @param workplaceId уникальный номер УРМ/кассы
+   * @param cashOrder кассовый ордер
    * @param depositTask данные для взноса на корпоративную карту
    * @param clientInfo информация о клиенте
    * @return пакет с новой активной задачей
    */
-  public OperationPackage addActiveDepositTask(String workplaceId,
+  public OperationPackage addActiveDepositTask(String workplaceId, CashOrder cashOrder,
       OperationTaskCardDeposit depositTask, ClientInfo clientInfo) {
-    return addDepositTask(workplaceId, depositTask, OperationTaskStatus.ACTIVE, clientInfo);
+    return addDepositTask(workplaceId, cashOrder,
+        depositTask, OperationTaskStatus.ACTIVE, clientInfo);
   }
 
   /**
    * Добавление новой перенаправленной задачи.
    *
    * @param workplaceId уникальный номер УРМ/кассы
+   * @param cashOrder кассовый ордер
    * @param depositTask данные для взноса на корпоративную карту
    * @param clientInfo информация о клиенте
    * @return пакет с новой перенаправленной задачей
    */
-  public OperationPackage addForwardedDepositTask(String workplaceId,
+  public OperationPackage addForwardedDepositTask(String workplaceId, CashOrder cashOrder,
       OperationTaskCardDeposit depositTask, ClientInfo clientInfo) {
-    return addDepositTask(workplaceId, depositTask, OperationTaskStatus.FORWARDED, clientInfo);
+    return addDepositTask(workplaceId, cashOrder,
+        depositTask, OperationTaskStatus.FORWARDED, clientInfo);
   }
 
-  private OperationPackage addDepositTask(String workplaceId, OperationTaskCardDeposit depositTask,
-      OperationTaskStatus taskStatus, ClientInfo clientInfo) {
+  private OperationPackage addDepositTask(String workplaceId, CashOrder cashOrder,
+      OperationTaskCardDeposit depositTask, OperationTaskStatus taskStatus,
+      ClientInfo clientInfo) {
     if (StringUtils.isEmpty(workplaceId)) {
       throw new InvalidDataException("Отсутствует запрашиваемый номер УРМ/кассы");
+    }
+    if (cashOrder == null) {
+      throw new InvalidDataException("Отсутствует кассовый ордер");
     }
     if (depositTask == null) {
       throw new InvalidDataException("Отсутствуют данные для взноса на корпоративную карту");
     }
+    cashOrder.setCashOrderId(UuidUtils.getRandomUuid());
+    cashOrder.setCashOrderStatus(CashOrderStatus.CREATED);
+    cashOrder.setCashOrderType(CashOrderType.KO_1);
+    cache.createCashOrder(cashOrder, clientInfo);
+    cache.addCashOrderToCashBook(cashOrder);
+
     OperationPackageRequest packageRequest = new OperationPackageRequest();
 
     packageRequest.setWorkPlaceUid(workplaceId);
@@ -142,12 +160,13 @@ public class OperationProvider {
    * @param packageId идентификатор пакета задач
    * @param taskId идентификатор задачи
    * @param workplaceId номер УРМ/кассы
+   * @param cashOrder кассовый ордер
    * @param operationTypeCode код типа операции
    * @param clientInfo информация о клиенте
    * @return информация об операции
    */
   public Operation confirmOperation(Long packageId, Long taskId, String workplaceId,
-      String operationTypeCode, ClientInfo clientInfo) {
+      CashOrder cashOrder, String operationTypeCode, ClientInfo clientInfo) {
     if (packageId == null) {
       throw new InvalidDataException("Отсутствует запрашиваемый идентификатор пакета задач");
     }
@@ -156,6 +175,9 @@ public class OperationProvider {
     }
     if (StringUtils.isEmpty(workplaceId)) {
       throw new InvalidDataException("Отсутствует запрашиваемый номер УРМ/кассы");
+    }
+    if (cashOrder == null) {
+      throw new InvalidDataException("Отсутствует кассовый ордер");
     }
     if (StringUtils.isEmpty(operationTypeCode)) {
       throw new InvalidDataException("Отсутствует запрашиваемый код типа операции");
@@ -181,9 +203,12 @@ public class OperationProvider {
     updateTasksPackage.setToCardDeposits(depositTasks);
 
     cache.updateTasksInPackage(updateTasksPackage, clientInfo);
+    cache.updCashOrder(cashOrder, clientInfo);
+    cache.addCashOrderToCashBook(cashOrder);
 
     Operation operation = mockCache.createOperation(workplaceId, operationTypeCode);
     operation = mockCache.commitOperation(operation);
+    operation.setCashOrderId(cashOrder.getCashOrderId());
     cache.addOperation(taskId, operation);
 
     return operation;

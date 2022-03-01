@@ -138,19 +138,22 @@ public class UserProviderTest {
     // given
     Workplace workplace = new Workplace();
     workplace.setType(WorkplaceType.UWP);
+    workplace.setId(WORKPLACE_ID);
     workplace.setCashboxOnBoard(true);
     workplace.setCurrencyType(CURRENCY_TYPE);
     workplace.setAmount(new BigDecimal("12345"));
+    workplace.setLimit(AMOUNT);
 
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(workplace);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
     provider.getWorkplace(CLIENT_INFO);
 
     // verify
     verify(cache, times(1)).getUser(anyString());
     verify(cache, times(1)).getOperator(anyString(), any(ClientInfo.class));
+    verify(cache, times(1)).getWorkplace(anyString(), any(ClientInfo.class));
     verifyNoMoreInteractions(cache);
   }
 
@@ -159,7 +162,7 @@ public class UserProviderTest {
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(null);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(null);
     provider.getWorkplace(CLIENT_INFO);
   }
 
@@ -173,7 +176,7 @@ public class UserProviderTest {
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(workplace);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
     provider.getWorkplace(CLIENT_INFO);
   }
 
@@ -186,7 +189,7 @@ public class UserProviderTest {
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(workplace);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
     provider.getWorkplace(CLIENT_INFO);
   }
 
@@ -200,7 +203,7 @@ public class UserProviderTest {
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(workplace);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
     provider.getWorkplace(CLIENT_INFO);
   }
 
@@ -212,11 +215,12 @@ public class UserProviderTest {
     workplace.setCurrencyType(CURRENCY_TYPE);
     workplace.setCashboxOnBoard(true);
     workplace.setAmount(new BigDecimal("9999999999"));
+    workplace.setLimit(new BigDecimal("1"));
 
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(workplace);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
     provider.getWorkplace(CLIENT_INFO);
   }
 
@@ -224,18 +228,24 @@ public class UserProviderTest {
   public void testCheckWorkplaceIncreasedAmount() throws Exception {
     // given
     Workplace workplace = new Workplace();
+    workplace.setType(WorkplaceType.UWP);
+    workplace.setId(WORKPLACE_ID);
+    workplace.setCashboxOnBoard(true);
+    workplace.setCurrencyType(CURRENCY_TYPE);
     workplace.setAmount(new BigDecimal("12345"));
+    workplace.setLimit(AMOUNT);
 
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(workplace);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
     provider.checkWorkplaceIncreasedAmount(AMOUNT, CLIENT_INFO);
 
     // verify
     verify(cache, times(1)).getUser(anyString());
     verify(cache, times(1)).getOperator(anyString(), any(ClientInfo.class));
-    verifyNoMoreInteractions(cache);
+    verify(cache, times(1)).getWorkplace(anyString(), any(ClientInfo.class));
+    verifyNoMoreInteractions(cache);;
   }
 
   @Test(expected = InvalidDataException.class)
@@ -243,7 +253,7 @@ public class UserProviderTest {
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(null);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(null);
     provider.checkWorkplaceIncreasedAmount(AMOUNT, CLIENT_INFO);
   }
 
@@ -252,7 +262,7 @@ public class UserProviderTest {
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(new Workplace());
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(new Workplace());
     provider.checkWorkplaceIncreasedAmount(AMOUNT, CLIENT_INFO);
   }
 
@@ -265,8 +275,13 @@ public class UserProviderTest {
     // when
     when(cache.getUser(anyString())).thenReturn(new User());
     when(cache.getOperator(anyString(), any(ClientInfo.class))).thenReturn(getOperator());
-    when(mockCache.getWorkplace(WORKPLACE_ID)).thenReturn(workplace);
+    when(cache.getWorkplace(WORKPLACE_ID, CLIENT_INFO)).thenReturn(workplace);
     provider.checkWorkplaceIncreasedAmount(AMOUNT, CLIENT_INFO);
+  }
+
+  @Test
+  public void testCheckOverLimit() {
+    when(cache.checkOverLimit(any(), any(ClientInfo.class))).thenReturn(true);
   }
 
   private Operator getOperator() {

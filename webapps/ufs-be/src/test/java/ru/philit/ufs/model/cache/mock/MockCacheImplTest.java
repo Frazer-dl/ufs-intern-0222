@@ -72,18 +72,6 @@ public class MockCacheImplTest {
   }
 
   @Test
-  public void testGetWorkplaceLimits() throws Exception {
-    // given
-    String workplaceId = "AC11921E8E1247009ED17924B8CD9E72";
-
-    // when
-    Workplace workplace = cache.getWorkplace(workplaceId);
-
-    // then
-    assertNotNull(workplace);
-  }
-
-  @Test
   public void testCreateOperation() throws Exception {
     // given
     String workplaceId = "AC11921E8E1247009ED17924B8CD9E72";

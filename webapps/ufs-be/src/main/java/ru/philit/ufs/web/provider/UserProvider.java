@@ -7,6 +7,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.UserCache;
+import ru.philit.ufs.model.entity.oper.Limit;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.SessionUser;
@@ -98,7 +99,7 @@ public class UserProvider {
    */
   public Workplace getWorkplace(ClientInfo clientInfo) {
     Operator operator = getOperator(clientInfo);
-    Workplace workplace = mockCache.getWorkplace(operator.getWorkplaceId());
+    Workplace workplace = cache.getWorkplace(operator.getWorkplaceId(), clientInfo);
     if (workplace == null) {
       throw new InvalidDataException("Запрашиваемое рабочее место не найдено в системе");
     }
@@ -112,7 +113,7 @@ public class UserProvider {
     if (workplace.getAmount() == null) {
       throw new InvalidDataException("Отсутствует общий остаток по кассе");
     }
-    if (!mockCache.checkOverLimit(workplace.getAmount())) {
+    if (workplace.getAmount().compareTo(workplace.getLimit()) >= 0) {
       throw new InvalidDataException("Превышен лимит общего остатка по кассе");
     }
     return workplace;
@@ -126,15 +127,30 @@ public class UserProvider {
    */
   public void checkWorkplaceIncreasedAmount(BigDecimal amount, ClientInfo clientInfo) {
     Operator operator = getOperator(clientInfo);
-    Workplace workplace = mockCache.getWorkplace(operator.getWorkplaceId());
+    Workplace workplace = cache.getWorkplace(operator.getWorkplaceId(), clientInfo);
     if (workplace == null) {
       throw new InvalidDataException("Запрашиваемое рабочее место не найдено в системе");
     }
     if (workplace.getAmount() == null) {
       throw new InvalidDataException("Отсутствует общий остаток по кассе");
     }
-    if (!mockCache.checkOverLimit(amount.add(workplace.getAmount()))) {
+    if (workplace.getLimit() == null) {
+      throw new InvalidDataException("Отсутствует лимит по кассе");
+    }
+    if (workplace.getAmount().compareTo(amount) >= 0) {
       throw new InvalidDataException("Превышен лимит общего остатка по кассе");
     }
+  }
+
+  /**
+   * Получение данных о превышении лимита.
+   *
+   * @param clientInfo информация о клиенте
+   */
+  public boolean checkOverLimit(BigDecimal amount, ClientInfo clientInfo) {
+    Limit request = new Limit();
+    request.setAmount(amount);
+    request.setUserLogin(clientInfo.getUser().getLogin());
+    return cache.checkOverLimit(request,clientInfo);
   }
 }

@@ -13,6 +13,7 @@ import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.OperationCache;
 import ru.philit.ufs.model.cache.UserCache;
 import ru.philit.ufs.model.entity.account.AccountOperationRequest;
+import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationTask;
@@ -135,4 +136,27 @@ public class ReportProvider {
             new AccountOperationRequest(accountId, amount, operation.getTypeCode()), clientInfo)
         : null;
   }
+
+  /**
+   * Получение касового журнала.
+   *
+   * @param cashOrderId номер кассового ордера
+   * @return значение кассового чека
+   */
+  public List<CashOrder> getCashBook(String cashOrderId) {
+    List<CashOrder> cashBook = new ArrayList<>();
+    if (cashOrderId != null) {
+      for (CashOrder cashOrder: operationCache.getCashBook()) {
+        if (cashOrder.getCashOrderId().equals(cashOrderId)) {
+          cashBook.add(cashOrder);
+        }
+      }
+      return cashBook;
+    }
+
+    cashBook = operationCache.getCashBook();
+
+    return cashBook;
+  }
+
 }

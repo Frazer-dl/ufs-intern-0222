@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ru.philit.ufs.model.entity.account.Representative;
+import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationTask;
@@ -18,8 +19,11 @@ import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
 import ru.philit.ufs.web.dto.OperationJournalDto;
 import ru.philit.ufs.web.mapping.OperationJournalMapper;
+import ru.philit.ufs.web.mapping.OperationMapper;
 import ru.philit.ufs.web.provider.ReportProvider;
 import ru.philit.ufs.web.provider.RepresentativeProvider;
+import ru.philit.ufs.web.view.GetCashBookReq;
+import ru.philit.ufs.web.view.GetCashBookResp;
 import ru.philit.ufs.web.view.GetOperationJournalReq;
 import ru.philit.ufs.web.view.GetOperationJournalResp;
 
@@ -33,6 +37,8 @@ public class ReportController {
   private final ReportProvider reportProvider;
   private final RepresentativeProvider representativeProvider;
   private final OperationJournalMapper operationJournalMapper;
+  private final OperationMapper operationMapper;
+
 
   /**
    * Конструктор бина.
@@ -41,11 +47,14 @@ public class ReportController {
   public ReportController(
       ReportProvider reportProvider,
       RepresentativeProvider representativeProvider,
-      OperationJournalMapper operationJournalMapper
+      OperationJournalMapper operationJournalMapper,
+      OperationMapper operationMapper
   ) {
     this.reportProvider = reportProvider;
     this.representativeProvider = representativeProvider;
     this.operationJournalMapper = operationJournalMapper;
+    this.operationMapper = operationMapper;
+
   }
 
   /**
@@ -95,5 +104,18 @@ public class ReportController {
     }
 
     return new GetOperationJournalResp().withSuccess(items);
+  }
+
+  /**
+   * Получение кассовой книги.
+   *
+   * @param request    параметры запроса списка
+   * @return список записей
+   */
+  @RequestMapping(value = "/cashBook", method = RequestMethod.POST)
+  public GetCashBookResp getCashBook(@RequestBody GetCashBookReq request) {
+    List<CashOrder> cashBook = reportProvider.getCashBook(request.getCashOrderId());
+
+    return new GetCashBookResp().withSuccess(operationMapper.asDto(cashBook));
   }
 }

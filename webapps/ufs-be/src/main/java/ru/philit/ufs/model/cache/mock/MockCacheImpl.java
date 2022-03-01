@@ -26,8 +26,6 @@ public class MockCacheImpl implements MockCache {
   private static final String LOGIN_SIDOROV = "Sidorov_SS";
   private static final String LOGIN_SVETLOVA = "Svetlova_SS";
 
-  private static final BigDecimal MAX_LIMIT = new BigDecimal("5000000.0");
-
   @Override
   public User getUser(String userLogin, String password) {
     if (StringUtils.isEmpty(userLogin)) {
@@ -84,38 +82,6 @@ public class MockCacheImpl implements MockCache {
     card.setOwnerLastName("PETROV");
 
     return card;
-  }
-
-  @Override
-  public Workplace getWorkplace(String workplaceId) {
-    Workplace workplace = new Workplace();
-
-    workplace.setType(WorkplaceType.UWP);
-    workplace.setCashboxOnBoard(true);
-    workplace.setSubbranchCode("1385930100");
-    workplace.setCashboxDeviceId("530690F50B9E49A6B3EDAE2CF6B7CC4F");
-    workplace.setCashboxDeviceType("CashierPro2520-sx");
-    workplace.setCurrencyType("RUB");
-    workplace.setAmount(new BigDecimal("100000.0"));
-    workplace.setLimit(new BigDecimal("500000.0"));
-    workplace.setCategoryLimits(new ArrayList<OperationTypeLimit>());
-
-    OperationTypeLimit categoryLimit1 = new OperationTypeLimit();
-    categoryLimit1.setCategoryId("0");
-    categoryLimit1.setLimit(new BigDecimal("50000.0"));
-    workplace.getCategoryLimits().add(categoryLimit1);
-
-    OperationTypeLimit categoryLimit2 = new OperationTypeLimit();
-    categoryLimit2.setCategoryId("1");
-    categoryLimit2.setLimit(new BigDecimal("15000.0"));
-    workplace.getCategoryLimits().add(categoryLimit2);
-
-    return workplace;
-  }
-
-  @Override
-  public boolean checkOverLimit(BigDecimal amount) {
-    return amount.compareTo(MAX_LIMIT) <= 0;
   }
 
   @Override

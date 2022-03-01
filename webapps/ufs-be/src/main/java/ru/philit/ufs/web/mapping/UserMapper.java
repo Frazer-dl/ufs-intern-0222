@@ -1,5 +1,6 @@
 package ru.philit.ufs.web.mapping;
 
+import java.math.BigDecimal;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.SessionUser;
 import ru.philit.ufs.model.entity.user.Workplace;
@@ -17,5 +18,7 @@ public interface UserMapper {
   OperatorDto asDto(Operator in);
 
   WorkplaceDto asDto(Workplace in);
+
+  BigDecimal asDto(String in);
 
 }

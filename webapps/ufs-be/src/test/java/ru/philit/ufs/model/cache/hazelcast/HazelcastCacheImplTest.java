@@ -35,8 +35,10 @@ import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.common.LocalKey;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
+import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.Limit;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -49,6 +51,7 @@ import ru.philit.ufs.model.entity.request.RequestType;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.service.AuditService;
 import ru.philit.ufs.web.exception.UserNotFoundException;
 
@@ -56,7 +59,9 @@ public class HazelcastCacheImplTest {
 
   private static final String SESSION_ID = "0";
   private static final User USER = new User("login");
+
   private static final ClientInfo CLIENT_INFO = new ClientInfo(SESSION_ID, USER, "localhost");
+  private static final Workplace workplace = new Workplace();
   private static final String OPERATION_ID = "123";
 
   private final IMap<String, User> userBySessionMap = new MockIMap<>();
@@ -96,6 +101,11 @@ public class HazelcastCacheImplTest {
       new MockIMap<>();
   private final IMap<LocalKey<String>, Operator> operatorByUserMap = new MockIMap<>();
 
+  private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderIMap = new MockIMap<>();
+  private final IMap<LocalKey<String>, Workplace> workplaceIMap = new MockIMap<>();
+  private final IMap<LocalKey<Limit>, ExternalEntityContainer<Boolean>>
+      checkOverLimitIMap = new MockIMap<>();
+
   @Mock
   private HazelcastBeClient client;
   @Mock
@@ -131,6 +141,9 @@ public class HazelcastCacheImplTest {
     when(client.getRepresentativeMap()).thenReturn(representativeMap);
     when(client.getRepresentativeByCardNumberMap()).thenReturn(representativeByCardNumberMap);
     when(client.getOperatorByUserMap()).thenReturn(operatorByUserMap);
+    when(client.getCashOrderMap()).thenReturn(cashOrderIMap);
+    when(client.getWorkplaceMap()).thenReturn(workplaceIMap);
+    when(client.getOverLimitMap()).thenReturn(checkOverLimitIMap);
 
     doAnswer(new Answer() {
       @Override
@@ -190,6 +203,16 @@ public class HazelcastCacheImplTest {
           case RequestType.OPERATOR_BY_USER:
             operatorByUserMap.put(key, new Operator());
             break;
+          case RequestType.CREATE_CASH_ORDER:
+          case RequestType.UPDATE_CASH_ORDER_STATUS:
+            cashOrderIMap.put(key, new CashOrder());
+            break;
+          case RequestType.GET_WORKPLACE_INFO:
+            workplaceIMap.put(key, new Workplace());
+            break;
+          case RequestType.CHECK_OVER_LIMIT:
+            checkOverLimitIMap.put(key, new ExternalEntityContainer<>(true));
+            break;
           default:
         }
         return null;
@@ -225,6 +248,10 @@ public class HazelcastCacheImplTest {
     assertNotNull(cache.getRepresentativesByCriteria(new RepresentativeRequest("1"), CLIENT_INFO));
     assertNotNull(cache.getCashSymbols(new CashSymbolRequest(), CLIENT_INFO));
     assertNotNull(cache.getOperator("1", CLIENT_INFO));
+    assertNotNull(cache.createCashOrder(new CashOrder(), CLIENT_INFO));
+    assertNotNull(cache.updCashOrder(new CashOrder(), CLIENT_INFO));
+    assertNotNull(cache.getWorkplace("1", CLIENT_INFO));
+    assertNotNull(cache.checkOverLimit(new Limit(), CLIENT_INFO));
 
     Operation operation = new Operation();
     operation.setId(OPERATION_ID);
@@ -273,4 +300,10 @@ public class HazelcastCacheImplTest {
   public void testUserNotFound() throws Exception {
     cache.getUser(SESSION_ID);
   }
+
+  @Test
+  public void testGetWorkplaceInfo() throws Exception {
+    assertNotNull(cache.getWorkplace(workplace.getId(), CLIENT_INFO));
+  }
+
 }
