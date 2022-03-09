@@ -10,7 +10,11 @@ import lombok.ToString;
 @SuppressWarnings("serial")
 public class GetCashBookReq {
   /**
-   * Идентификатор кассового ордера.
+   * Кассовые операции с даты.
    */
-  private String cashOrderId;
+  private String fromDate;
+  /**
+   * Кассовые операции по дату.
+   */
+  private String toDate;
 }

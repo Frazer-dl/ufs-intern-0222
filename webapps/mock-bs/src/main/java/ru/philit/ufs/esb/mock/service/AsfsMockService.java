@@ -169,7 +169,7 @@ public class AsfsMockService extends CommonMockService implements MessageProcess
     response.getSrvUpdCashOrderRsMessage().setCashOrderId(cashOrderId);
     response.getSrvUpdCashOrderRsMessage().setResponseMsg("message");
     response.getSrvUpdCashOrderRsMessage().setResponseCode("200");
-    mockCache.updStCashOrder(cashOrderId, statusType);
+    mockCache.updStCashOrder(cashOrderId, statusType, new Date());
     return response;
   }
 

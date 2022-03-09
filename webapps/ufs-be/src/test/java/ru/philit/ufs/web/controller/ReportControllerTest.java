@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -125,9 +126,6 @@ public class ReportControllerTest extends RestControllerTest {
 
   @Test
   public void testGetCasbook() throws Exception {
-    GetCashBookReq request = new GetCashBookReq();
-    request.setCashOrderId("12345");
-
     CashOrder cashOrder = new CashOrder();
     cashOrder.setCashOrderId("12345");
     cashOrder.setAccountId("54321");
@@ -137,6 +135,9 @@ public class ReportControllerTest extends RestControllerTest {
     cashOrder.setCashOrderStatus(CashOrderStatus.COMMITTED);
     cashOrder.setCashOrderINum("0000000");
     cashOrder.setCurrencyType("RUB");
+    String stringDate = "2022-03-09";
+    Date date = new SimpleDateFormat("yyyy-MM-dd").parse(stringDate);
+    cashOrder.setCreatedDttm(date);
     Representative representative = new Representative();
     representative.setLastName("Петров");
     representative.setFirstName("Петр");
@@ -150,10 +151,10 @@ public class ReportControllerTest extends RestControllerTest {
         "location1", "locationType1");
     cashOrder.setRecipientBank(subbranch);
 
-    when(reportProvider.getCashBook("12345"))
+    when(reportProvider.getCashBook(null, null))
         .thenReturn(Collections.singletonList(cashOrder));
-
-    String responseJson = performAndGetContent(post("/report/cashBook")
+    GetCashBookReq request = new GetCashBookReq();
+    String responseJson = performAndGetContent(post("/report/cashBook?startDate=&endDate=")
         .content(toRequest(request)));
 
     GetCashBookResp response = toResponse(responseJson, GetCashBookResp.class);

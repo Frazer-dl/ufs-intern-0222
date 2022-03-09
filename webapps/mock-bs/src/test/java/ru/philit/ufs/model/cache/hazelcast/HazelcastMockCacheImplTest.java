@@ -173,17 +173,17 @@ public class HazelcastMockCacheImplTest {
   public void updCashOrderSt() throws Exception {
     SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage co =
         new SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage();
-    Date day = new Date();
+    Date date = new Date();
     GregorianCalendar calendar = new GregorianCalendar();
-    calendar.setTime(day);
+    calendar.setTime(date);
     co.setCashOrderId("12345");
     co.setCashOrderStatus(CashOrderStatusType.CREATED);
     co.setCreatedDttm(DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar));
     CashOrderStatusType cashOrderStatusType = CashOrderStatusType.COMMITTED;
     String cashOrderId = "12345";
-    mockCache.crCashOrder(cashOrderId, co, day);
-    mockCache.updStCashOrder(cashOrderId, cashOrderStatusType);
-    Assert.assertEquals(cashOrders.get(day).get(cashOrderId).getCashOrderStatus(),
+    mockCache.crCashOrder(cashOrderId, co, date);
+    mockCache.updStCashOrder(cashOrderId, cashOrderStatusType, date);
+    Assert.assertEquals(cashOrders.get(date).get(cashOrderId).getCashOrderStatus(),
         CashOrderStatusType.COMMITTED);
   }
 
@@ -196,6 +196,7 @@ public class HazelcastMockCacheImplTest {
     co.setCashOrderStatus(CashOrderStatusType.CREATED);
     co.setAmount(BigDecimal.valueOf(200000));
     co.setAccountId("1");
+    co.setUserLogin("login");
     Date date = new Date();
     mockCache.crCashOrder(cashOrderId, co, date);
     Assert.assertTrue(mockCache.checkOverLimit(co.getAccountId(), date));

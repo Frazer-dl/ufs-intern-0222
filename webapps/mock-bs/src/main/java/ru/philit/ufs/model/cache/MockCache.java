@@ -37,9 +37,9 @@ public interface MockCache {
         Date toDate, List<Long> taskIds);
 
   void crCashOrder(String cashOrderId,
-      SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage response, Date day);
+      SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage response, Date date);
 
-  void updStCashOrder(String cashOrderId, CashOrderStatusType statusType);
+  void updStCashOrder(String cashOrderId, CashOrderStatusType statusType, Date date);
 
-  Boolean checkOverLimit(String accountId, Date date);
+  Boolean checkOverLimit(String login, Date date);
 }

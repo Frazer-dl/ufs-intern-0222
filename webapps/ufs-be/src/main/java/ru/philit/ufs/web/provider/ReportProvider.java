@@ -1,6 +1,8 @@
 package ru.philit.ufs.web.provider;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -138,7 +140,7 @@ public class ReportProvider {
   }
 
   /**
-   * Получение касового журнала.
+   * Получение касового журнала по id.
    *
    * @param cashOrderId номер кассового ордера
    * @return значение кассового чека
@@ -157,6 +159,39 @@ public class ReportProvider {
     cashBook = operationCache.getCashBook();
 
     return cashBook;
+  }
+
+  /**
+   * Получение касового журнала по дате.
+   *
+   * @param startDate дата начала поиска
+   * @param endDate дата окончания поиска
+   * @return значение кассового чека
+   */
+  public List<CashOrder> getCashBook(String startDate, String endDate) throws ParseException {
+    Date begin = new Date();
+    if (startDate != null) {
+      begin = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+    }
+    Date end = new Date();
+    if (endDate != null) {
+      end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+    }
+    List<CashOrder> cashBook = new ArrayList<>();
+    for (CashOrder cashOrder: operationCache.getCashBook()) {
+      if (isBetweenHalfOpen(cashOrder.getCreatedDttm(), begin, end)) {
+        cashBook.add(cashOrder);
+      }
+    }
+
+    cashBook = operationCache.getCashBook();
+
+    return cashBook;
+  }
+
+  public static boolean isBetweenHalfOpen(Date value, Date start, Date end) {
+    return (start == null || value.compareTo(start) >= 0)
+        && (end == null || value.compareTo(end) <= 0);
   }
 
 }

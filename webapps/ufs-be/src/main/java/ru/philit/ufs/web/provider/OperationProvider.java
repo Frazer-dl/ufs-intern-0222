@@ -203,7 +203,8 @@ public class OperationProvider {
     updateTasksPackage.setToCardDeposits(depositTasks);
 
     cache.updateTasksInPackage(updateTasksPackage, clientInfo);
-    cache.updCashOrder(cashOrder, clientInfo);
+    cashOrder.setCashOrderStatus(CashOrderStatus.COMMITTED);
+    cache.createCashOrder(cashOrder, clientInfo);
     cache.addCashOrderToCashBook(cashOrder);
 
     Operation operation = mockCache.createOperation(workplaceId, operationTypeCode);

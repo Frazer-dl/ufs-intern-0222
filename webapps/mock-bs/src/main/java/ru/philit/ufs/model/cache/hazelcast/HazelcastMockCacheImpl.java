@@ -179,23 +179,21 @@ public class HazelcastMockCacheImpl implements MockCache {
   }
 
   @Override
-  public void crCashOrder(String cashOrderId, SrvCreateCashOrderRsMessage response, Date day) {
-    saveCashOrders(hazelcastServer.getCashOrders(), day, cashOrderId, response);
+  public void crCashOrder(String cashOrderId, SrvCreateCashOrderRsMessage response, Date date) {
+    saveCashOrders(hazelcastServer.getCashOrders(), date, cashOrderId, response);
   }
 
   @Override
-  public void updStCashOrder(String cashOrderId, CashOrderStatusType statusType) {
+  public void updStCashOrder(String cashOrderId, CashOrderStatusType statusType, Date date) {
     AtomicReference<SrvCreateCashOrderRsMessage> cashOrder
         = new AtomicReference<>(new SrvCreateCashOrderRsMessage());
     IMap<Date, Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage>> cashOrders
         = hazelcastServer.getCashOrders();
-    cashOrders.values().forEach(map -> {
-      if (map.containsKey(cashOrderId)) {
-        cashOrder.set(map.get(cashOrderId));
-      }
-    });
+    if (date == null) {
+      date = new Date();
+    }
+    cashOrder.set(cashOrders.get(date).get(cashOrderId));
     cashOrder.get().setCashOrderStatus(statusType);
-    Date date = cashOrder.get().getCreatedDttm().toGregorianCalendar().getTime();
     saveCashOrders(cashOrders, date, cashOrderId, cashOrder.get());
   }
 
@@ -211,7 +209,7 @@ public class HazelcastMockCacheImpl implements MockCache {
   }
 
   @Override
-  public Boolean checkOverLimit(String accountId, Date date) {
+  public Boolean checkOverLimit(String login, Date date) {
     if (date == null) {
       date = new Date();
     }
@@ -220,7 +218,8 @@ public class HazelcastMockCacheImpl implements MockCache {
       Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage> map
           = hazelcastServer.getCashOrders().get(date);
       for (SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage co : map.values()) {
-        if (co.getAccountId().equals(accountId)) {
+        if (co.getUserLogin().equals(login)
+            && co.getCashOrderStatus().equals(CashOrderStatusType.COMMITTED)) {
           userAmount.add(co.getAmount());
         }
       }

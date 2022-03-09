@@ -1,12 +1,16 @@
 package ru.philit.ufs.web.controller;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.oper.CashOrder;
@@ -109,12 +113,14 @@ public class ReportController {
   /**
    * Получение кассовой книги.
    *
-   * @param request    параметры запроса списка
+   * @param request параметры запроса списка
    * @return список записей
    */
   @RequestMapping(value = "/cashBook", method = RequestMethod.POST)
-  public GetCashBookResp getCashBook(@RequestBody GetCashBookReq request) {
-    List<CashOrder> cashBook = reportProvider.getCashBook(request.getCashOrderId());
+  public GetCashBookResp getCashBook(@RequestBody GetOperationJournalReq request)
+      throws ParseException {
+    List<CashOrder> cashBook = reportProvider.getCashBook(request.getFromDate(),
+        request.getToDate());
 
     return new GetCashBookResp().withSuccess(operationMapper.asDto(cashBook));
   }

@@ -193,7 +193,7 @@ public class OperationProviderTest {
     verify(cache, times(1))
         .updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
     verify(cache, times(1))
-        .updCashOrder(any(CashOrder.class), any(ClientInfo.class));
+        .createCashOrder(any(CashOrder.class), any(ClientInfo.class));
     verify(cache, times(1))
         .addOperation(anyLong(), any(Operation.class));
   }
@@ -283,7 +283,7 @@ public class OperationProviderTest {
     verify(cache, times(1))
         .updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
     verify(cache, times(1))
-        .updCashOrder(any(CashOrder.class), any(ClientInfo.class));
+        .createCashOrder(any(CashOrder.class), any(ClientInfo.class));
     verify(cache, times(1))
         .addOperation(anyLong(), any(Operation.class));
   }
