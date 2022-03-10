@@ -1,6 +1,7 @@
 package ru.philit.ufs.model.converter.esb.asfs;
 
 import java.util.ArrayList;
+import org.mapstruct.factory.Mappers;
 import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
@@ -16,6 +17,9 @@ import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.user.Subbranch;
 
 public class CashOrderAdapter extends AsfsAdapter {
+
+  private static final CashOrderAdapterMapper mapper
+      = Mappers.getMapper(CashOrderAdapterMapper.class);
 
   private static OperTypeLabel operTypeLabel(OperationTypeCode operationTypeCode) {
     return (operationTypeCode != null) ? OperTypeLabel.fromValue(operationTypeCode.code())
@@ -186,6 +190,45 @@ public class CashOrderAdapter extends AsfsAdapter {
     CashOrder cashOrder = new CashOrder();
     map(response.getHeaderInfo(), cashOrder);
     map(response.getSrvUpdCashOrderRsMessage(), cashOrder);
+    return cashOrder;
+  }
+
+  //MapStruct https://russianblogs.com/article/74641633114/#1MapStruct_3
+  /**
+   * Возвращает объект запроса на создание кассового ордера.
+   */
+  public static SrvCreateCashOrderRq requestCreateOrderMapStruct(CashOrder cashOrder) {
+    SrvCreateCashOrderRq request = new SrvCreateCashOrderRq();
+    request.setHeaderInfo(headerInfo());
+    request.setSrvCreateCashOrderRqMessage(mapper.mapCreate(cashOrder));
+    return request;
+  }
+
+  /**
+   * Возвращает объект запроса на обновление кассового ордера.
+   */
+  public static SrvUpdStCashOrderRq requestUpdStCashOrderMapStruct(CashOrder cashOrder) {
+    SrvUpdStCashOrderRq request = new SrvUpdStCashOrderRq();
+    request.setHeaderInfo(headerInfo());
+    request.setSrvUpdCashOrderRqMessage(mapper.mapUpdate(cashOrder));
+    return request;
+  }
+
+  /**
+   * Преобразует транспортный объект кассового ордера во внутреннюю сущность.
+   */
+  public static CashOrder convertMapStruct(SrvCreateCashOrderRs response) {
+    CashOrder cashOrder = mapper.convert(response.getSrvCreateCashOrderRsMessage());
+    map(response.getHeaderInfo(), cashOrder);
+    return cashOrder;
+  }
+
+  /**
+   * Преобразует транспортный объект обновленного кассового ордера во внутреннюю сущность.
+   */
+  public static CashOrder convertMapStruct(SrvUpdStCashOrderRs response) {
+    CashOrder cashOrder = mapper.convert(response.getSrvUpdCashOrderRsMessage());
+    map(response.getHeaderInfo(), cashOrder);
     return cashOrder;
   }
 }

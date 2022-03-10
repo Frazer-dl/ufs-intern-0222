@@ -58,8 +58,32 @@ public class WorkPlaceAdapterTest extends AsfsAdapterTest {
   }
 
   @Test
+  public void testRequestGetWorkPlaceInfoMapStruct() {
+    SrvGetWorkPlaceInfoRq request = WorkPlaceAdapter.requestGetWorkPlaceMapStruct("1");
+    assertHeaderInfo(headerInfo());
+    Assert.assertNotNull(request.getSrvGetWorkPlaceInfoRqMessage());
+    Assert.assertEquals(request.getSrvGetWorkPlaceInfoRqMessage().getWorkPlaceUId(), "1");
+  }
+
+  @Test
   public void convertGetWorkPlaceInfoRs() {
     Workplace workplace = WorkPlaceAdapter.convert(response);
+    assertHeaderInfo(workplace, FIX_UUID);
+    Assert.assertEquals(workplace.getCashboxDeviceType(),
+        response.getSrvGetWorkPlaceInfoRsMessage().getCashboxDeviceType());
+    Assert.assertEquals(workplace.getType().code(),
+        response.getSrvGetWorkPlaceInfoRsMessage().getWorkPlaceType().intValue());
+    Assert.assertEquals(workplace.getAmount(),
+        response.getSrvGetWorkPlaceInfoRsMessage().getAmount());
+    Assert.assertEquals(workplace.getLimit(),
+        response.getSrvGetWorkPlaceInfoRsMessage().getWorkPlaceLimit());
+    Assert.assertEquals(workplace.getSubbranchCode(),
+        response.getSrvGetWorkPlaceInfoRsMessage().getSubbranchCode());
+  }
+
+  @Test
+  public void convertGetWorkPlaceInfoRsMapStruct() {
+    Workplace workplace = WorkPlaceAdapter.convertMapStruct(response);
     assertHeaderInfo(workplace, FIX_UUID);
     Assert.assertEquals(workplace.getCashboxDeviceType(),
         response.getSrvGetWorkPlaceInfoRsMessage().getCashboxDeviceType());

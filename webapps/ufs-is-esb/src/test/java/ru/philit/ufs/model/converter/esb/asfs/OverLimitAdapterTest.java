@@ -49,9 +49,29 @@ public class OverLimitAdapterTest extends AsfsAdapterTest {
   }
 
   @Test
+  public void testRequestOverLimitMapStruct() {
+    SrvCheckOverLimitRq request = OverLimitAdapter.requestOverLimitMapStruct(limit);
+    assertHeaderInfo(request.getHeaderInfo());
+    Assert.assertNotNull(request.getSrvCheckOverLimitRqMessage());
+    Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getUserLogin(),
+        limit.getUserLogin());
+    Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getAmount(), limit.getAmount());
+    Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().isTobeIncreased(),
+        limit.isTobeIncreased());
+  }
+
+  @Test
   public void testConverterOverLimit() {
     ExternalEntityContainer<Boolean> container = OverLimitAdapter.convert(response);
     assertHeaderInfo(container, FIX_UUID);
     Assert.assertEquals(container.getData(), true);
   }
+
+  @Test
+  public void testConverterOverLimitMapStruct() {
+    ExternalEntityContainer<Boolean> container = OverLimitAdapter.convertMapStruct(response);
+    assertHeaderInfo(container, FIX_UUID);
+    Assert.assertEquals(container.getData(), true);
+  }
+
 }

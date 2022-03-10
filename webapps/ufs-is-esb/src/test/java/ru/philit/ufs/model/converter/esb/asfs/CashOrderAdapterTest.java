@@ -148,6 +148,25 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
   }
 
   @Test
+  public void testRequestCreateCashOrderMapStruct() {
+    SrvCreateCashOrderRq request = CashOrderAdapter.requestCreateOrderMapStruct(cashOrder);
+    assertHeaderInfo(headerInfo());
+    Assert.assertNotNull(request.getSrvCreateCashOrderRqMessage());
+    Assert.assertEquals(request.getSrvCreateCashOrderRqMessage().getAccountId(),
+        cashOrder.getAccountId());
+  }
+
+  @Test
+  public void testRequestUpdStCashOrderMapStruct() {
+    SrvUpdStCashOrderRq request = CashOrderAdapter.requestUpdStCashOrderMapStruct(cashOrder);
+    assertHeaderInfo(headerInfo());
+    Assert.assertNotNull(request.getSrvUpdCashOrderRqMessage());
+    Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderId(), "12345");
+    Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderStatus(),
+        CashOrderStatusType.CREATED);
+  }
+
+  @Test
   public void testConverterCreateCashOrder() {
     CashOrder cashOrder = CashOrderAdapter.convert(response1);
     assertHeaderInfo(cashOrder, FIX_UUID);
@@ -165,4 +184,24 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
         .getCashOrderId());
     Assert.assertEquals(cashOrder.getCashOrderStatus(), CashOrderStatus.COMMITTED);
   }
+
+  @Test
+  public void testConverterCreateCashOrderMapStruct() {
+    CashOrder cashOrder = CashOrderAdapter.convertMapStruct(response1);
+    assertHeaderInfo(cashOrder, FIX_UUID);
+    Assert.assertEquals(cashOrder.getAccountId(), response1.getSrvCreateCashOrderRsMessage()
+        .getAccountId());
+    Assert.assertEquals(cashOrder.getCashOrderId(), response1.getSrvCreateCashOrderRsMessage()
+        .getCashOrderId());
+  }
+
+  @Test
+  public void testConverterUpdStMapStruct() {
+    CashOrder cashOrder = CashOrderAdapter.convertMapStruct(response2);
+    assertHeaderInfo(cashOrder, FIX_UUID);
+    Assert.assertEquals(cashOrder.getCashOrderId(), response2.getSrvUpdCashOrderRsMessage()
+        .getCashOrderId());
+    Assert.assertEquals(cashOrder.getCashOrderStatus(), CashOrderStatus.COMMITTED);
+  }
+
 }
