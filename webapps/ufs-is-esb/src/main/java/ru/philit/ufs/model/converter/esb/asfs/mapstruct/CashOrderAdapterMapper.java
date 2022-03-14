@@ -1,11 +1,13 @@
-package ru.philit.ufs.model.converter.esb.asfs;
+package ru.philit.ufs.model.converter.esb.asfs.mapstruct;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.ValueMapping;
 import org.mapstruct.ValueMappings;
+import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
+import ru.philit.ufs.model.entity.esb.asfs.OperTypeLabel;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq.SrvCreateCashOrderRqMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
@@ -14,9 +16,11 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.CashOrderStatus;
+import ru.philit.ufs.model.entity.oper.CashOrderType;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 
-@Mapper(componentModel = "spring", uses = {UtilMapper.class})
+
+@Mapper(componentModel = "spring")
 public interface CashOrderAdapterMapper {
 
   @Mappings({
@@ -114,4 +118,13 @@ public interface CashOrderAdapterMapper {
   })
   SrvCreateCashOrderRqMessage
       .AdditionalInfo.CashSymbols.CashSymbolItem map(CashSymbol  cashSymbol);
+
+  default CashOrderType map(
+      ru.philit.ufs.model.entity.esb.asfs.CashOrderType cashOrderType) {
+    return (cashOrderType != null) ? CashOrderType.getByCode(cashOrderType.value()) : null;
+  }
+
+  default OperTypeLabel map(OperationTypeCode operationTypeCode) {
+    return (operationTypeCode != null) ? OperTypeLabel.fromValue(operationTypeCode.code()) : null;
+  }
 }

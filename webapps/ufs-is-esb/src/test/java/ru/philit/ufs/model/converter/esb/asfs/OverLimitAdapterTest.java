@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import ru.philit.ufs.model.converter.esb.asfs.mapstruct.OverLimitAdapterMapStruct;
 import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.esb.asfs.LimitStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq;
@@ -50,7 +51,7 @@ public class OverLimitAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testRequestOverLimitMapStruct() {
-    SrvCheckOverLimitRq request = OverLimitAdapter.requestOverLimitMapStruct(limit);
+    SrvCheckOverLimitRq request = OverLimitAdapterMapStruct.requestOverLimitMapStruct(limit);
     assertHeaderInfo(request.getHeaderInfo());
     Assert.assertNotNull(request.getSrvCheckOverLimitRqMessage());
     Assert.assertEquals(request.getSrvCheckOverLimitRqMessage().getUserLogin(),
@@ -69,7 +70,8 @@ public class OverLimitAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testConverterOverLimitMapStruct() {
-    ExternalEntityContainer<Boolean> container = OverLimitAdapter.convertMapStruct(response);
+    ExternalEntityContainer<Boolean> container
+        = OverLimitAdapterMapStruct.convertMapStruct(response);
     assertHeaderInfo(container, FIX_UUID);
     Assert.assertEquals(container.getData(), true);
   }

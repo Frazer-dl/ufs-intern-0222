@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import ru.philit.ufs.model.converter.esb.asfs.mapstruct.WorkPlaceAdapterMapStruct;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRs.SrvGetWorkPlaceInfoRsMessage;
@@ -59,7 +60,7 @@ public class WorkPlaceAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testRequestGetWorkPlaceInfoMapStruct() {
-    SrvGetWorkPlaceInfoRq request = WorkPlaceAdapter.requestGetWorkPlaceMapStruct("1");
+    SrvGetWorkPlaceInfoRq request = WorkPlaceAdapterMapStruct.requestGetWorkPlaceMapStruct("1");
     assertHeaderInfo(headerInfo());
     Assert.assertNotNull(request.getSrvGetWorkPlaceInfoRqMessage());
     Assert.assertEquals(request.getSrvGetWorkPlaceInfoRqMessage().getWorkPlaceUId(), "1");
@@ -83,7 +84,7 @@ public class WorkPlaceAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void convertGetWorkPlaceInfoRsMapStruct() {
-    Workplace workplace = WorkPlaceAdapter.convertMapStruct(response);
+    Workplace workplace = WorkPlaceAdapterMapStruct.convertMapStruct(response);
     assertHeaderInfo(workplace, FIX_UUID);
     Assert.assertEquals(workplace.getCashboxDeviceType(),
         response.getSrvGetWorkPlaceInfoRsMessage().getCashboxDeviceType());

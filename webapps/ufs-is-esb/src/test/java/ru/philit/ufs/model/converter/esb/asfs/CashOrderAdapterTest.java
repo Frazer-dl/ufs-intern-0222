@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import ru.philit.ufs.model.converter.esb.asfs.mapstruct.CashOrderAdapterMapStruct;
 import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
@@ -149,7 +150,7 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testRequestCreateCashOrderMapStruct() {
-    SrvCreateCashOrderRq request = CashOrderAdapter.requestCreateOrderMapStruct(cashOrder);
+    SrvCreateCashOrderRq request = CashOrderAdapterMapStruct.requestCreateOrderMapStruct(cashOrder);
     assertHeaderInfo(headerInfo());
     Assert.assertNotNull(request.getSrvCreateCashOrderRqMessage());
     Assert.assertEquals(request.getSrvCreateCashOrderRqMessage().getAccountId(),
@@ -158,7 +159,8 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testRequestUpdStCashOrderMapStruct() {
-    SrvUpdStCashOrderRq request = CashOrderAdapter.requestUpdStCashOrderMapStruct(cashOrder);
+    SrvUpdStCashOrderRq request
+        = CashOrderAdapterMapStruct.requestUpdStCashOrderMapStruct(cashOrder);
     assertHeaderInfo(headerInfo());
     Assert.assertNotNull(request.getSrvUpdCashOrderRqMessage());
     Assert.assertEquals(request.getSrvUpdCashOrderRqMessage().getCashOrderId(), "12345");
@@ -187,7 +189,7 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testConverterCreateCashOrderMapStruct() {
-    CashOrder cashOrder = CashOrderAdapter.convertMapStruct(response1);
+    CashOrder cashOrder = CashOrderAdapterMapStruct.convertMapStruct(response1);
     assertHeaderInfo(cashOrder, FIX_UUID);
     Assert.assertEquals(cashOrder.getAccountId(), response1.getSrvCreateCashOrderRsMessage()
         .getAccountId());
@@ -197,7 +199,7 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testConverterUpdStMapStruct() {
-    CashOrder cashOrder = CashOrderAdapter.convertMapStruct(response2);
+    CashOrder cashOrder = CashOrderAdapterMapStruct.convertMapStruct(response2);
     assertHeaderInfo(cashOrder, FIX_UUID);
     Assert.assertEquals(cashOrder.getCashOrderId(), response2.getSrvUpdCashOrderRsMessage()
         .getCashOrderId());
