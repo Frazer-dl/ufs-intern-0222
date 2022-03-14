@@ -209,7 +209,7 @@ public class HazelcastMockCacheImpl implements MockCache {
   }
 
   @Override
-  public Boolean checkOverLimit(String login, Date date) {
+  public Boolean checkOverLimit(String login, Date date, BigDecimal amount) {
     if (date == null) {
       date = new Date();
     }
@@ -220,10 +220,12 @@ public class HazelcastMockCacheImpl implements MockCache {
       for (SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage co : map.values()) {
         if (co.getUserLogin().equals(login)
             && co.getCashOrderStatus().equals(CashOrderStatusType.COMMITTED)) {
-          userAmount.add(co.getAmount());
+          userAmount = userAmount.add(co.getAmount());
         }
       }
+      userAmount = userAmount.add(amount);
     }
+    System.out.println(userAmount);
     return userAmount.compareTo(BigDecimal.valueOf(600000)) <= 0;
   }
 

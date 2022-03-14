@@ -1,5 +1,6 @@
 package ru.philit.ufs.model.cache;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,5 +42,5 @@ public interface MockCache {
 
   void updStCashOrder(String cashOrderId, CashOrderStatusType statusType, Date date);
 
-  Boolean checkOverLimit(String login, Date date);
+  Boolean checkOverLimit(String login, Date date, BigDecimal amount);
 }

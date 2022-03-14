@@ -94,7 +94,9 @@ public class AsfsMockService extends CommonMockService implements MessageProcess
     String login = request.getSrvCheckOverLimitRqMessage().getUserLogin();
     response.getSrvCheckOverLimitRsMessage().setResponseCode("200");
     response.getSrvCheckOverLimitRsMessage()
-        .setStatus(mockCache.checkOverLimit(login, new Date()) ? LimitStatusType.LIMIT_PASSED :
+        .setStatus(mockCache.checkOverLimit(login,
+            new Date(),
+            request.getSrvCheckOverLimitRqMessage().getAmount()) ? LimitStatusType.LIMIT_PASSED :
             LimitStatusType.LIMIT_ERROR);
     return response;
   }
