@@ -16,6 +16,7 @@ import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTask;
 import ru.philit.ufs.model.entity.oper.OperationTaskCardDeposit;
+import ru.philit.ufs.model.entity.oper.OperationTaskDeposit;
 import ru.philit.ufs.model.entity.oper.OperationTaskStatus;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
@@ -160,13 +161,12 @@ public class OperationProvider {
    * @param packageId идентификатор пакета задач
    * @param taskId идентификатор задачи
    * @param workplaceId номер УРМ/кассы
-   * @param cashOrder кассовый ордер
    * @param operationTypeCode код типа операции
    * @param clientInfo информация о клиенте
    * @return информация об операции
    */
   public Operation confirmOperation(Long packageId, Long taskId, String workplaceId,
-      CashOrder cashOrder, String operationTypeCode, ClientInfo clientInfo) {
+      String operationTypeCode, ClientInfo clientInfo) {
     if (packageId == null) {
       throw new InvalidDataException("Отсутствует запрашиваемый идентификатор пакета задач");
     }
@@ -175,9 +175,6 @@ public class OperationProvider {
     }
     if (StringUtils.isEmpty(workplaceId)) {
       throw new InvalidDataException("Отсутствует запрашиваемый номер УРМ/кассы");
-    }
-    if (cashOrder == null) {
-      throw new InvalidDataException("Отсутствует кассовый ордер");
     }
     if (StringUtils.isEmpty(operationTypeCode)) {
       throw new InvalidDataException("Отсутствует запрашиваемый код типа операции");
@@ -203,16 +200,33 @@ public class OperationProvider {
     updateTasksPackage.setToCardDeposits(depositTasks);
 
     cache.updateTasksInPackage(updateTasksPackage, clientInfo);
-    cashOrder.setCashOrderStatus(CashOrderStatus.COMMITTED);
-    cache.createCashOrder(cashOrder, clientInfo);
-    cache.addCashOrderToCashBook(cashOrder);
 
-    Operation operation = mockCache.createOperation(workplaceId, operationTypeCode);
-    operation = mockCache.commitOperation(operation);
-    operation.setCashOrderId(cashOrder.getCashOrderId());
-    cache.addOperation(taskId, operation);
-
-    return operation;
+    OperationTask operationTaskDeposit;
+    switch (operationTypeCode) {
+      case "ToAccountDepositRub":
+        operationTaskDeposit = updateTasksPackage.getToAccountDeposits().stream()
+          .findFirst().orElse(null);
+        break;
+      case "ToCardDeposit":
+        operationTaskDeposit = updateTasksPackage.getToCardDeposits().stream()
+          .findFirst().orElse(null);
+        break;
+      default:
+        operationTaskDeposit = null;
+    }
+    if (operationTaskDeposit != null) {
+      Operation operation = mockCache.createOperation(workplaceId, operationTypeCode);
+      CashOrder cashOrder = mockCache.createCashOrder(operation,
+          (OperationTaskDeposit) operationTaskDeposit);
+      cache.createCashOrder(cashOrder, clientInfo);
+      operation.setCashOrderId(cashOrder.getCashOrderId());
+      operation = mockCache.commitOperation(operation);
+      cashOrder = cache.updCashOrder(cashOrder, clientInfo);
+      cache.addCashOrderToCashBook(cashOrder);
+      cache.addOperation(taskId, operation);
+      return operation;
+    }
+    return null;
   }
 
   /**

@@ -225,7 +225,6 @@ public class HazelcastMockCacheImpl implements MockCache {
       }
       userAmount = userAmount.add(amount);
     }
-    System.out.println(userAmount);
     return userAmount.compareTo(BigDecimal.valueOf(600000)) <= 0;
   }
 

@@ -199,6 +199,7 @@ public class HazelcastMockCacheImplTest {
     co.setUserLogin("login");
     Date date = new Date();
     mockCache.crCashOrder(cashOrderId, co, date);
-    Assert.assertFalse(mockCache.checkOverLimit(co.getUserLogin(), date, BigDecimal.valueOf(500000)));
+    Assert.assertFalse(mockCache.checkOverLimit(co.getUserLogin(),
+        date, BigDecimal.valueOf(500000)));
   }
 }

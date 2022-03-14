@@ -83,8 +83,7 @@ public class OperationController {
   ) {
     Operation operation = provider.confirmOperation(
         mapper.asEntity(request.getPackageId()), mapper.asEntity(request.getTaskId()),
-        request.getWorkplaceId(), mapper.asEntity(request.getCashOrderDto()),
-        request.getOperationTypeCode(), clientInfo
+        request.getWorkplaceId(), request.getOperationTypeCode(), clientInfo
     );
     return new FinishOperationResp().withSuccess(mapper.asDto(operation));
   }

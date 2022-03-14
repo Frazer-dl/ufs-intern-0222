@@ -113,7 +113,7 @@ public class OperationControllerTest extends RestControllerTest {
     opPackage.setToCardDeposits(Arrays.asList(task1, task2));
 
     when(provider.confirmOperation(
-        anyLong(), anyLong(), anyString(), any(CashOrder.class), anyString(), any(ClientInfo.class)
+        anyLong(), anyLong(), anyString(), anyString(), any(ClientInfo.class)
     )).thenReturn(new Operation());
 
     String responseJson = performAndGetContent(post("/operation/confirm").content(requestJson));
@@ -123,7 +123,7 @@ public class OperationControllerTest extends RestControllerTest {
     assertNotNull(response.getData());
 
     verify(provider, times(1)).confirmOperation(
-        anyLong(), anyLong(), anyString(), any(CashOrder.class), anyString(), any(ClientInfo.class)
+        anyLong(), anyLong(), anyString(), anyString(), any(ClientInfo.class)
     );
     verifyNoMoreInteractions(provider);
   }

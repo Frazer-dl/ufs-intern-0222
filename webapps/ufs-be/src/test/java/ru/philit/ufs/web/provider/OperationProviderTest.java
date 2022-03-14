@@ -170,12 +170,7 @@ public class OperationProviderTest {
   @Test
   public void testConfirmOperation() throws Exception {
     // given
-    OperationTask task1 = new OperationTask();
-    task1.setId(TASK_ID - 1);
-    OperationTask task2 = new OperationTask();
-    task2.setId(TASK_ID);
     OperationPackage opPackage = new OperationPackage();
-    opPackage.setToCardDeposits(Arrays.asList(task1, task2));
 
     // when
     when(cache.getTasksInPackage(any(OperationTasksRequest.class), any(ClientInfo.class)))
@@ -185,16 +180,14 @@ public class OperationProviderTest {
     doNothing().when(cache)
         .addOperation(anyLong(), any(Operation.class));
     provider
-        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, CASH_ORDER, TYPE_CODE, CLIENT_INFO);
+        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, TYPE_CODE, CLIENT_INFO);
 
     // verify
     verify(cache, times(1))
         .getTasksInPackage(any(OperationTasksRequest.class), any(ClientInfo.class));
     verify(cache, times(1))
         .updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
-    verify(cache, times(1))
-        .createCashOrder(any(CashOrder.class), any(ClientInfo.class));
-    verify(cache, times(1))
+    verify(cache, times(0))
         .addOperation(anyLong(), any(Operation.class));
   }
 
@@ -202,7 +195,7 @@ public class OperationProviderTest {
   public void testConfirmOperationNullPackageId() throws Exception {
     // when
     provider
-        .confirmOperation(null, TASK_ID, WORKPLACE_ID, CASH_ORDER, TYPE_CODE, CLIENT_INFO);
+        .confirmOperation(null, TASK_ID, WORKPLACE_ID, TYPE_CODE, CLIENT_INFO);
 
     // verify
     verifyZeroInteractions(cache);
@@ -212,7 +205,7 @@ public class OperationProviderTest {
   public void testConfirmOperationNullTaskId() throws Exception {
     // when
     provider
-        .confirmOperation(PACKAGE_ID, null, WORKPLACE_ID, CASH_ORDER, TYPE_CODE, CLIENT_INFO);
+        .confirmOperation(PACKAGE_ID, null, WORKPLACE_ID, TYPE_CODE, CLIENT_INFO);
 
     // verify
     verifyZeroInteractions(cache);
@@ -222,17 +215,7 @@ public class OperationProviderTest {
   public void testConfirmOperationNullWorkplaceId() throws Exception {
     // when
     provider
-        .confirmOperation(PACKAGE_ID, TASK_ID, null, CASH_ORDER, TYPE_CODE, CLIENT_INFO);
-
-    // verify
-    verifyZeroInteractions(cache);
-  }
-
-  @Test(expected = InvalidDataException.class)
-  public void testConfirmOperationNullCashOrder() throws Exception {
-    // when
-    provider
-        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, null, TYPE_CODE, CLIENT_INFO);
+        .confirmOperation(PACKAGE_ID, TASK_ID, null, TYPE_CODE, CLIENT_INFO);
 
     // verify
     verifyZeroInteractions(cache);
@@ -242,7 +225,7 @@ public class OperationProviderTest {
   public void testConfirmOperationNullTypeCode() throws Exception {
     // when
     provider
-        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, CASH_ORDER, null, CLIENT_INFO);
+        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, null, CLIENT_INFO);
 
     // verify
     verifyZeroInteractions(cache);
@@ -254,7 +237,7 @@ public class OperationProviderTest {
     when(cache.getTasksInPackage(any(OperationTasksRequest.class), any(ClientInfo.class)))
         .thenReturn(null);
     provider
-        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, CASH_ORDER, TYPE_CODE, CLIENT_INFO);
+        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, TYPE_CODE, CLIENT_INFO);
 
     // verify
     verify(cache, times(1))
@@ -275,16 +258,14 @@ public class OperationProviderTest {
     doNothing().when(cache)
         .addOperation(anyLong(), any(Operation.class));
     provider
-        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, CASH_ORDER, TYPE_CODE, CLIENT_INFO);
+        .confirmOperation(PACKAGE_ID, TASK_ID, WORKPLACE_ID, TYPE_CODE, CLIENT_INFO);
 
     // verify
     verify(cache, times(1))
         .getTasksInPackage(any(OperationTasksRequest.class), any(ClientInfo.class));
     verify(cache, times(1))
         .updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
-    verify(cache, times(1))
-        .createCashOrder(any(CashOrder.class), any(ClientInfo.class));
-    verify(cache, times(1))
+    verify(cache, times(0))
         .addOperation(anyLong(), any(Operation.class));
   }
 
