@@ -7,12 +7,18 @@ import org.junit.Before;
 import org.junit.Test;
 import ru.philit.ufs.model.converter.esb.asfs.mapstruct.CashOrderAdapterMapStruct;
 import ru.philit.ufs.model.entity.account.Representative;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs.SrvGetCashOrderRsMessage;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashOrderStatus;
 import ru.philit.ufs.model.entity.oper.CashOrderType;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
@@ -23,8 +29,10 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
   private static final String FIX_UUID = "a55ed415-3976-41f7-916c-4c17ca79e969";
 
   private CashOrder cashOrder;
+  private CashOrderRequest cashOrderRequest;
   private SrvCreateCashOrderRs response1;
   private SrvUpdStCashOrderRs response2;
+  private SrvGetCashOrderRs response3;
 
   /**
    * Set up test data.
@@ -81,6 +89,42 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
     repData.setId("1");
     repData.setResident(false);
     cashOrder.setRepresentative(repData);
+    cashOrderRequest = new CashOrderRequest();
+    cashOrderRequest.setFromDate(date(2022, 3, 1, 0, 0));
+    cashOrderRequest.setToDate(date(2022, 3, 31, 0, 0));
+
+
+    CashOrderItem cashOrderItem = new CashOrderItem();
+    cashOrderItem.setAccountId("12344");
+    cashOrderItem.setAmount(BigDecimal.valueOf(1000));
+    cashOrderItem.setCashOrderStatus(CashOrderStatusType.CREATED);
+    cashOrderItem.setUserPosition("position");
+    cashOrderItem.setUserFullName("Ivanov Ivan Ivanovich");
+    cashOrderItem.setOperationId("1");
+    cashOrderItem.setFDestLEName("123");
+    cashOrderItem.setClientTypeFK(false);
+    cashOrderItem.setRecipientBank("Bank1");
+    cashOrderItem.setRecipientBankBIC("111111");
+    cashOrderItem.setSenderBank("Bank2");
+    cashOrderItem.setSenderBankBIC("222222");
+    cashOrderItem.setLegalEntityShortName("OOO");
+    cashOrderItem.setRepFIO("Ivanov Ivan Ivanovich");
+    SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem.CashSymbols cashSymbol2
+        = new SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem.CashSymbols();
+    SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem
+        .CashSymbols.CashSymbolItem cashSymbolItem2
+        = new SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem
+        .CashSymbols.CashSymbolItem();
+    cashSymbolItem2.setCashSymbol("DC");
+    cashSymbolItem2.setCashSymbolAmount(BigDecimal.TEN);
+    cashSymbol2.getCashSymbolItem().add(cashSymbolItem2);
+    cashOrderItem.setCashSymbols(cashSymbol2);
+    cashOrderItem.setCreatedDttm(xmlCalendar(2022, 2, 25, 12, 43));
+    cashOrderItem.setINN("1234567890");
+    cashOrderItem.setCashOrderINum("55555");
+    cashOrderItem.setCashOrderType(ru.philit.ufs.model.entity.esb.asfs.CashOrderType.KO_1);
+    cashOrderItem.setResponseMsg("200");
+    cashOrderItem.setResponseCode("message");
 
     response1 = new SrvCreateCashOrderRs();
     response1.setHeaderInfo(headerInfo(FIX_UUID));
@@ -127,6 +171,11 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
     response2.getSrvUpdCashOrderRsMessage().setCashOrderId("12345");
     response2.getSrvUpdCashOrderRsMessage().setResponseMsg("200");
     response2.getSrvUpdCashOrderRsMessage().setResponseCode("8888");
+
+    response3 = new SrvGetCashOrderRs();
+    response3.setHeaderInfo(headerInfo(FIX_UUID));
+    response3.setSrvGetCashOrderRsMessage(new SrvGetCashOrderRsMessage());
+    response3.getSrvGetCashOrderRsMessage().getCashOrderItem().add(cashOrderItem);
   }
 
   @Test
@@ -169,6 +218,24 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
   }
 
   @Test
+  public void testRequestGetCashOrder() {
+    SrvGetCashOrderRq request = CashOrderAdapter.requestGetCashOrder(cashOrderRequest);
+    assertHeaderInfo(headerInfo());
+    Assert.assertNotNull(request.getSrvGetCashOrderRqMessage());
+    Assert.assertEquals(request.getSrvGetCashOrderRqMessage().getCreatedFrom(),
+        xmlCalendar(2022, 3, 1, 0, 0));
+  }
+
+  @Test
+  public void testRequestGetCashOrderMapStruct() {
+    SrvGetCashOrderRq request = CashOrderAdapterMapStruct.requestGetCashOrderMapStruct(cashOrderRequest);
+    assertHeaderInfo(headerInfo());
+    Assert.assertNotNull(request.getSrvGetCashOrderRqMessage());
+    Assert.assertEquals(request.getSrvGetCashOrderRqMessage().getCreatedFrom(),
+        xmlCalendar(2022, 3, 1, 0, 0));
+  }
+
+  @Test
   public void testConverterCreateCashOrder() {
     CashOrder cashOrder = CashOrderAdapter.convert(response1);
     assertHeaderInfo(cashOrder, FIX_UUID);
@@ -206,4 +273,19 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
     Assert.assertEquals(cashOrder.getCashOrderStatus(), CashOrderStatus.COMMITTED);
   }
 
+  @Test
+  public void testConverterGetCashOrder() {
+    ExternalEntityList<CashOrder> list = CashOrderAdapter.convert(response3);
+    assertHeaderInfo(list, FIX_UUID);
+    Assert.assertEquals(list.getItems().get(0).getCashOrderId(),
+        response3.getSrvGetCashOrderRsMessage().getCashOrderItem().get(0).getCashOrderId());
+  }
+
+  @Test
+  public void testConverterGetCashOrderMapStruct() {
+    ExternalEntityList<CashOrder> list = CashOrderAdapterMapStruct.convertMapStruct(response3);
+    assertHeaderInfo(list, FIX_UUID);
+    Assert.assertEquals(list.getItems().get(0).getCashOrderId(),
+        response3.getSrvGetCashOrderRsMessage().getCashOrderItem().get(0).getCashOrderId());
+  }
 }

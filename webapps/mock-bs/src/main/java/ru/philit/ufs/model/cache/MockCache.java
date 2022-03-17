@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
@@ -43,4 +44,7 @@ public interface MockCache {
   void updStCashOrder(String cashOrderId, CashOrderStatusType statusType, Date date);
 
   Boolean checkOverLimit(String login, Date date, BigDecimal amount);
+
+  List<SrvGetCashOrderRs
+      .SrvGetCashOrderRsMessage.CashOrderItem> getCashOrdersByDate(Date fromDate, Date toDate);
 }

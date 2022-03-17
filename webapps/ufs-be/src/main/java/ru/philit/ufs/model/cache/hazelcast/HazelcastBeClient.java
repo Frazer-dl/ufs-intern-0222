@@ -5,6 +5,7 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_BY_CAR
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_RESIDUES_BY_ID_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.AUDITED_REQUESTS;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_BOOK_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_ORDERS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_ORDER_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_SYMBOLS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMISSION_BY_ACCOUNT_OPERATION_MAP;
@@ -55,11 +56,13 @@ import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.account.RepresentativeRequest;
 import ru.philit.ufs.model.entity.account.Seizure;
 import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.ExternalEntityRequest;
 import ru.philit.ufs.model.entity.common.LocalKey;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
 import ru.philit.ufs.model.entity.oper.Limit;
@@ -157,6 +160,9 @@ public class HazelcastBeClient {
   private IMap<LocalKey<Limit>, ExternalEntityContainer<Boolean>> overLimitMap;
   @Getter
   private IMap<String, CashOrder> cashBookMap;
+  @Getter
+  private IMap<LocalKey<CashOrderRequest>, ExternalEntityList<CashOrder>> cashBookByDateMap;
+
 
   @Autowired
   public HazelcastBeClient(
@@ -211,6 +217,7 @@ public class HazelcastBeClient {
     workplaceMap = instance.getMap(WORKPLACE_MAP);
     overLimitMap = instance.getMap(OVER_LIMIT_MAP);
     cashBookMap = instance.getMap(CASH_BOOK_MAP);
+    cashBookMap = instance.getMap(CASH_ORDERS_MAP);
 
     logger.info("{} started", this.getClass().getSimpleName());
   }

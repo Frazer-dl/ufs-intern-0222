@@ -34,6 +34,7 @@ public class RequestType {
   public static final String CREATE_CASH_ORDER = "CREATE_CASH_ORDER";
   public static final String GET_WORKPLACE_INFO = "GET_WORKPLACE_INFO";
   public static final String UPDATE_CASH_ORDER_STATUS = "UPDATE_CASH_ORDER_STATUS";
+  public static final String GET_CASH_ORDERS = "GET_CASH_ORDERS";
 
   private RequestType() {}
 

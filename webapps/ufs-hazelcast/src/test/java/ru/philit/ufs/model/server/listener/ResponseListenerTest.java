@@ -31,6 +31,7 @@ import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
 import ru.philit.ufs.model.entity.oper.Limit;
@@ -109,6 +110,9 @@ public class ResponseListenerTest {
 
   private final IMap<LocalKey<CashOrder>, CashOrder> cashOrderIMap = new MockIMap<>();
 
+  private final IMap<LocalKey<CashOrderRequest>, ExternalEntityList<CashOrder>> cashOrdersIMap =
+      new MockIMap<>();
+
   private final IMap<LocalKey<String>, Workplace> workplaceIMap = new MockIMap<>();
 
   private final IMap<LocalKey<Limit>, ExternalEntityContainer<Boolean>> overLimitMap =
@@ -158,6 +162,7 @@ public class ResponseListenerTest {
     when(hazelcastServer.getOperatorByUserMap()).thenReturn(operatorByUserMap);
     when(hazelcastServer.getCashSymbolsMap()).thenReturn(cashSymbolsMap);
     when(hazelcastServer.getCashOrderMap()).thenReturn(cashOrderIMap);
+    when(hazelcastServer.getCashOrdersMap()).thenReturn(cashOrdersIMap);
     when(hazelcastServer.getWorkplaceMap()).thenReturn(workplaceIMap);
     when(hazelcastServer.getOverLimitMap()).thenReturn(overLimitMap);
     responseListener.init();
@@ -1295,6 +1300,33 @@ public class ResponseListenerTest {
     LocalKey<CashOrder> localKey = new LocalKey<>(SESSION_ID, cashOrder);
     Assert.assertTrue(cashOrderIMap.containsKey(localKey));
     Assert.assertEquals(cashOrderIMap.get(localKey), order);
+  }
+
+  @Test
+  public void testItemAdded_GetCashOrders() throws Exception {
+    // given
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.GET_CASH_ORDERS);
+    CashOrderRequest requestKey = new CashOrderRequest();
+    requestKey.setToDate(new Date());
+    requestKey.setFromDate(new Date());
+    request.setRequestData(requestKey);
+    ExternalEntityList<CashOrder> cashOrders = new ExternalEntityList<>();
+    cashOrders.setRequestUid(FIX_UUID);
+    cashOrders.setReceiveDate(new Date());
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setRequestUid(FIX_UUID);
+    cashOrder.setReceiveDate(new Date());
+    cashOrders.getItems().add(cashOrder);
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(cashOrders);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<CashOrderRequest> localKey = new LocalKey<>(SESSION_ID, requestKey);
+    Assert.assertTrue(cashOrdersIMap.containsKey(localKey));
+    Assert.assertEquals(cashOrdersIMap.get(localKey), cashOrders);
   }
 
   @Test

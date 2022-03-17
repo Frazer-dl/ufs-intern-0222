@@ -1,11 +1,12 @@
 package ru.philit.ufs.model.cache;
 
 import java.util.List;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
-import ru.philit.ufs.model.entity.oper.OperationTaskDeposit;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 
@@ -37,5 +38,7 @@ public interface OperationCache {
   void addCashOrderToCashBook(CashOrder cashOrder);
 
   List<CashOrder> getCashBook();
+
+  ExternalEntityList<CashOrder> getCashBook(CashOrderRequest request, ClientInfo clientInfo);
 
 }

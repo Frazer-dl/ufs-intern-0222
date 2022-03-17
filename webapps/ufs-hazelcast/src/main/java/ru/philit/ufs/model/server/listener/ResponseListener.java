@@ -24,6 +24,7 @@ import ru.philit.ufs.model.entity.common.LocalKey;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
 import ru.philit.ufs.model.entity.oper.Limit;
@@ -329,6 +330,16 @@ public class ResponseListener
               new LocalKey<>(request.getSessionId(),
                   (Limit) request.getRequestData()),
               (ExternalEntityContainer<Boolean>) entity);
+        }
+        break;
+
+      case RequestType.GET_CASH_ORDERS:
+        if (entity instanceof ExternalEntityList
+            && (elementClass1 == null || elementClass1 == CashOrder.class)) {
+          hazelcastServer.getCashOrdersMap().put(
+              new LocalKey<>(request.getSessionId(),
+                  (CashOrderRequest) request.getRequestData()),
+              ((ExternalEntityList<CashOrder>) entity));
         }
         break;
 

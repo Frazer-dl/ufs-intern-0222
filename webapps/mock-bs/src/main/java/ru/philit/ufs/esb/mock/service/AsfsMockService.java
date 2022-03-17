@@ -3,6 +3,7 @@ package ru.philit.ufs.esb.mock.service;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
@@ -21,6 +22,9 @@ import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs.SrvGetCashOrderRsMessage;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRs.SrvGetWorkPlaceInfoRsMessage;
@@ -71,6 +75,9 @@ public class AsfsMockService extends CommonMockService implements MessageProcess
 
         } else if (request instanceof SrvUpdStCashOrderRq) {
           sendResponse(getResponse((SrvUpdStCashOrderRq) request));
+
+        } else if (request instanceof SrvGetCashOrderRq) {
+          sendResponse(getResponse((SrvGetCashOrderRq) request));
         }
         return true;
       }
@@ -172,6 +179,17 @@ public class AsfsMockService extends CommonMockService implements MessageProcess
     response.getSrvUpdCashOrderRsMessage().setResponseMsg("message");
     response.getSrvUpdCashOrderRsMessage().setResponseCode("200");
     mockCache.updStCashOrder(cashOrderId, statusType, new Date());
+    return response;
+  }
+
+  private SrvGetCashOrderRs getResponse(SrvGetCashOrderRq request) {
+    SrvGetCashOrderRs response = new SrvGetCashOrderRs();
+    response.setHeaderInfo(copyHeaderInfo(request.getHeaderInfo()));
+    response.setSrvGetCashOrderRsMessage(new SrvGetCashOrderRsMessage());
+    List<SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem> rsMessageItems =
+        mockCache.getCashOrdersByDate(date(request.getSrvGetCashOrderRqMessage().getCreatedFrom()),
+            date(request.getSrvGetCashOrderRqMessage().getCreatedTo()));
+    response.getSrvGetCashOrderRsMessage().getCashOrderItem().addAll(rsMessageItems);
     return response;
   }
 

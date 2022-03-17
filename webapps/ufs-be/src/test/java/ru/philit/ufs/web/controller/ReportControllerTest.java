@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.mockito.Spy;
 import ru.philit.ufs.model.entity.account.IdentityDocument;
 import ru.philit.ufs.model.entity.account.IdentityDocumentType;
 import ru.philit.ufs.model.entity.account.Representative;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.CashOrderStatus;
@@ -41,7 +43,6 @@ import ru.philit.ufs.web.mapping.impl.OperationJournalMapperImpl;
 import ru.philit.ufs.web.mapping.impl.OperationMapperImpl;
 import ru.philit.ufs.web.provider.ReportProvider;
 import ru.philit.ufs.web.provider.RepresentativeProvider;
-import ru.philit.ufs.web.view.GetCashBookReq;
 import ru.philit.ufs.web.view.GetCashBookResp;
 import ru.philit.ufs.web.view.GetOperationJournalReq;
 import ru.philit.ufs.web.view.GetOperationJournalResp;
@@ -126,6 +127,10 @@ public class ReportControllerTest extends RestControllerTest {
 
   @Test
   public void testGetCasbook() throws Exception {
+    GetOperationJournalReq request = new GetOperationJournalReq();
+    request.setFromDate("08.03.2022");
+    request.setToDate("10.03.2022");
+
     CashOrder cashOrder = new CashOrder();
     cashOrder.setCashOrderId("12345");
     cashOrder.setAccountId("54321");
@@ -150,11 +155,14 @@ public class ReportControllerTest extends RestControllerTest {
         "0278000222", "044525225", "ПАО \"Сбербанк\"", "30165465190064106565",
         "location1", "locationType1");
     cashOrder.setRecipientBank(subbranch);
+    List<CashOrder> cashOrderList = new ArrayList<>();
+    cashOrderList.add(cashOrder);
+    ExternalEntityList<CashOrder> list = new ExternalEntityList<>();
+    list.setItems(cashOrderList);
+    when(reportProvider.getCashBook(any(Date.class), any(Date.class), any(ClientInfo.class)))
+        .thenReturn(list);
 
-    when(reportProvider.getCashBook(null, null))
-        .thenReturn(Collections.singletonList(cashOrder));
-    GetCashBookReq request = new GetCashBookReq();
-    String responseJson = performAndGetContent(post("/report/cashBook?startDate=&endDate=")
+    String responseJson = performAndGetContent(post("/report/cashBook")
         .content(toRequest(request)));
 
     GetCashBookResp response = toResponse(responseJson, GetCashBookResp.class);

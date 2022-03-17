@@ -2,7 +2,6 @@ package ru.philit.ufs.web.provider;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +14,9 @@ import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.OperationCache;
 import ru.philit.ufs.model.cache.UserCache;
 import ru.philit.ufs.model.entity.account.AccountOperationRequest;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationTask;
@@ -140,58 +141,17 @@ public class ReportProvider {
   }
 
   /**
-   * Получение касового журнала по id.
-   *
-   * @param cashOrderId номер кассового ордера
-   * @return значение кассового чека
-   */
-  public List<CashOrder> getCashBook(String cashOrderId) {
-    List<CashOrder> cashBook = new ArrayList<>();
-    if (cashOrderId != null) {
-      for (CashOrder cashOrder: operationCache.getCashBook()) {
-        if (cashOrder.getCashOrderId().equals(cashOrderId)) {
-          cashBook.add(cashOrder);
-        }
-      }
-      return cashBook;
-    }
-
-    cashBook = operationCache.getCashBook();
-
-    return cashBook;
-  }
-
-  /**
    * Получение касового журнала по дате.
    *
    * @param startDate дата начала поиска
    * @param endDate дата окончания поиска
    * @return значение кассового чека
    */
-  public List<CashOrder> getCashBook(String startDate, String endDate) throws ParseException {
-    Date begin = new Date();
-    if (startDate != null) {
-      begin = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
-    }
-    Date end = new Date();
-    if (endDate != null) {
-      end = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
-    }
-    List<CashOrder> cashBook = new ArrayList<>();
-    for (CashOrder cashOrder: operationCache.getCashBook()) {
-      if (isBetweenHalfOpen(cashOrder.getCreatedDttm(), begin, end)) {
-        cashBook.add(cashOrder);
-      }
-    }
-
-    cashBook = operationCache.getCashBook();
-
-    return cashBook;
+  public ExternalEntityList<CashOrder> getCashBook(Date startDate,
+      Date endDate, ClientInfo clientInfo) throws ParseException {
+    CashOrderRequest cashOrderRequest = new CashOrderRequest();
+    cashOrderRequest.setFromDate(startDate);
+    cashOrderRequest.setToDate(endDate);
+    return operationCache.getCashBook(cashOrderRequest, clientInfo);
   }
-
-  public static boolean isBetweenHalfOpen(Date value, Date start, Date end) {
-    return (start == null || value.compareTo(start) >= 0)
-        && (end == null || value.compareTo(end) <= 0);
-  }
-
 }

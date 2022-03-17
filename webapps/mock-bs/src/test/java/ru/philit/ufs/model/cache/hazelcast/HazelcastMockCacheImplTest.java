@@ -4,8 +4,10 @@ import static org.mockito.Mockito.when;
 
 import com.hazelcast.core.IMap;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.datatype.DatatypeFactory;
@@ -16,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
@@ -49,6 +53,9 @@ public class HazelcastMockCacheImplTest {
   private IMap<String, Long> packageIdByInn = new MockIMap<>();
   private IMap<Date, Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage>> cashOrders =
       new MockIMap<>();
+  private IMap<Date, Map<String,
+      SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem>> cashOrdersByDate =
+      new MockIMap<>();
 
   /**
    * Set up test data.
@@ -71,6 +78,7 @@ public class HazelcastMockCacheImplTest {
     when(hazelcastMockServer.getPackageById()).thenReturn(packageById);
     when(hazelcastMockServer.getPackageIdByInn()).thenReturn(packageIdByInn);
     when(hazelcastMockServer.getCashOrders()).thenReturn(cashOrders);
+    when(hazelcastMockServer.getCashOrdersByDate()).thenReturn(cashOrdersByDate);
   }
 
   @Test
@@ -201,5 +209,32 @@ public class HazelcastMockCacheImplTest {
     mockCache.crCashOrder(cashOrderId, co, date);
     Assert.assertFalse(mockCache.checkOverLimit(co.getUserLogin(),
         date, BigDecimal.valueOf(500000)));
+  }
+
+  @Test
+  public void getCashOrders() {
+    CashOrderItem cashOrderItem1 = new CashOrderItem();
+    cashOrderItem1.setCashOrderId("1");
+    CashOrderItem cashOrderItem2 = new CashOrderItem();
+    cashOrderItem2.setCashOrderId("2");
+    CashOrderItem cashOrderItem3 = new CashOrderItem();
+    cashOrderItem3.setCashOrderId("3");
+    Map<String,
+        SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem> coMap = new HashMap<>();
+    coMap.put("1", cashOrderItem1);
+    Date date1 = new GregorianCalendar(2022, Calendar.APRIL, 10).getTime();
+    cashOrdersByDate.put(date1, coMap);
+    Date date2 = new GregorianCalendar(2022, Calendar.APRIL, 15).getTime();
+    cashOrdersByDate.put(date2, coMap);
+    Date date3 = new GregorianCalendar(2022, Calendar.APRIL, 20).getTime();
+    cashOrdersByDate.put(date3, coMap);
+    SrvGetCashOrderRs.SrvGetCashOrderRsMessage co =
+        new SrvGetCashOrderRs.SrvGetCashOrderRsMessage();
+    co.getCashOrderItem().add(cashOrderItem1);
+    co.getCashOrderItem().add(cashOrderItem2);
+    co.getCashOrderItem().add(cashOrderItem3);
+    List<SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem> list =
+        mockCache.getCashOrdersByDate(date1, date2);
+    Assert.assertEquals(2, list.size());
   }
 }

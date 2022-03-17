@@ -35,6 +35,7 @@ import ru.philit.ufs.model.entity.common.ExternalEntity;
 import ru.philit.ufs.model.entity.common.ExternalEntityRequest;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCheckOverLimitRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvGetWorkPlaceInfoRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
 import ru.philit.ufs.model.entity.esb.eks.SrvAccountByCardNumRq;
@@ -65,6 +66,7 @@ import ru.philit.ufs.model.entity.esb.pprb.SrvUpdCashDepAnmntItemRq;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
 import ru.philit.ufs.model.entity.oper.Limit;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
@@ -382,6 +384,15 @@ public class EsbServiceImpl
           }
           break;
 
+        case RequestType.GET_CASH_ORDERS:
+          if (isCashOrderRequest(entityRequest)) {
+            SrvGetCashOrderRq request = CashOrderAdapter
+                .requestGetCashOrder((CashOrderRequest) entityRequest.getRequestData());
+            isEsbCache.putRequest(request.getHeaderInfo().getRqUID(), entityRequest);
+            esbClient.sendMessage(asfsConverter.getXml(request));
+          }
+          break;
+
         default:
           logger.error("Sending ExternalEntityRequest with unknown entityType {}",
               entityRequest.getEntityType());
@@ -450,7 +461,8 @@ public class EsbServiceImpl
 
   private boolean isCashOrderRequest(ExternalEntityRequest entityRequest) {
     return entityRequest.getRequestData() != null
-        && entityRequest.getRequestData() instanceof CashOrder;
+        && (entityRequest.getRequestData() instanceof CashOrder
+        || entityRequest.getRequestData() instanceof CashOrderRequest);
   }
 
   /**

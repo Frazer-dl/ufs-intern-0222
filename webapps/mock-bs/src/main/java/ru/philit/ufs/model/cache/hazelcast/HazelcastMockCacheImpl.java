@@ -28,6 +28,7 @@ import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.PkgStatusType;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
@@ -226,6 +227,20 @@ public class HazelcastMockCacheImpl implements MockCache {
       userAmount = userAmount.add(amount);
     }
     return userAmount.compareTo(BigDecimal.valueOf(600000)) <= 0;
+  }
+
+  @Override
+  public List<SrvGetCashOrderRs
+      .SrvGetCashOrderRsMessage.CashOrderItem> getCashOrdersByDate(Date fromDate, Date toDate) {
+    return hazelcastServer.getCashOrdersByDate().entrySet().stream()
+        .filter(d -> isBetween(d.getKey(), fromDate, toDate))
+        .map(co -> co.getValue().values())
+        .collect(ArrayList::new, List::addAll, List::addAll);
+  }
+
+  private boolean isBetween(Date value, Date start, Date end) {
+    return (start == null || value.compareTo(start) >= 0)
+        && (end == null || value.compareTo(end) <= 0);
   }
 
   private List<String> searchTasks(Map<Long, String> tasks, PkgTaskStatusType taskStatus,

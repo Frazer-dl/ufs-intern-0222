@@ -30,6 +30,7 @@ import ru.philit.ufs.model.entity.common.ExternalEntityRequest;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
 import ru.philit.ufs.model.entity.oper.Limit;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
@@ -370,6 +371,17 @@ public class EsbServiceImplTest {
     // when
     request.setEntityType(RequestType.GET_WORKPLACE_INFO);
     esbService.sendRequest(request);
+
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // given
+    request.setRequestData(new CashOrderRequest());
+
+    // when
+    request.setEntityType(RequestType.GET_CASH_ORDERS);
+    esbService.sendRequest(request);
+    requestCount++;
     // then
     Assert.assertEquals(putRequests.size(), requestCount);
 
@@ -388,7 +400,8 @@ public class EsbServiceImplTest {
         RequestType.SEARCH_REPRESENTATIVE, RequestType.SEIZURES_BY_ACCOUNT,
         RequestType.UPDATE_OPER_TASK, RequestType.UPDATE_OVN,
         RequestType.CREATE_CASH_ORDER, RequestType.CHECK_OVER_LIMIT,
-        RequestType.UPDATE_CASH_ORDER_STATUS, RequestType.GET_WORKPLACE_INFO};
+        RequestType.UPDATE_CASH_ORDER_STATUS, RequestType.GET_WORKPLACE_INFO,
+        RequestType.GET_CASH_ORDERS};
     for (String requestType : requestTypes) {
       // when
       request.setEntityType(requestType);

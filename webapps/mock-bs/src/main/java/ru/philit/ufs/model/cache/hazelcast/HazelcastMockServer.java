@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.config.property.HazelcastServerProperties;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
 
@@ -63,6 +64,12 @@ public class HazelcastMockServer {
    */
   @Getter
   private IMap<Date, Map<String, SrvCreateCashOrderRs.SrvCreateCashOrderRsMessage>> cashOrders;
+  /**
+   * Пакеты операций по кассовым ордерам за дату.
+   */
+  @Getter
+  private IMap<Date, Map<String,
+      SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem>> cashOrdersByDate;
 
   /**
    * Конструктор бина.
@@ -108,6 +115,7 @@ public class HazelcastMockServer {
     packageById = instance.getMap("packageById");
     packageIdByInn = instance.getMap("packageIdByInn");
     cashOrders = instance.getMap("cashOrders");
+    cashOrdersByDate = instance.getMap("cashOrdersByDate");
   }
 
   /**

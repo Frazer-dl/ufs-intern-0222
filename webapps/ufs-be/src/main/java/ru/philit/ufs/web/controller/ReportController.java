@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ru.philit.ufs.model.entity.account.Representative;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.oper.CashOrder;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
@@ -113,11 +114,12 @@ public class ReportController {
    * @return список записей
    */
   @RequestMapping(value = "/cashBook", method = RequestMethod.POST)
-  public GetCashBookResp getCashBook(@RequestBody GetOperationJournalReq request)
-      throws ParseException {
-    List<CashOrder> cashBook = reportProvider.getCashBook(request.getFromDate(),
-        request.getToDate());
+  public GetCashBookResp getCashBook(@RequestBody GetOperationJournalReq request,
+      ClientInfo clientInfo) throws ParseException {
+    ExternalEntityList<CashOrder> cashBook =
+        reportProvider.getCashBook(operationJournalMapper.asEntity(request.getFromDate()),
+        operationJournalMapper.asEntity(request.getToDate()), clientInfo);
 
-    return new GetCashBookResp().withSuccess(operationMapper.asDto(cashBook));
+    return new GetCashBookResp().withSuccess(operationMapper.asDto(cashBook.getItems()));
   }
 }

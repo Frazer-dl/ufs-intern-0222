@@ -1,16 +1,20 @@
 package ru.philit.ufs.model.converter.esb.asfs;
 
 import java.util.ArrayList;
-import org.mapstruct.factory.Mappers;
+import java.util.stream.Collectors;
 import ru.philit.ufs.model.entity.account.Representative;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.esb.asfs.CashOrderStatusType;
 import ru.philit.ufs.model.entity.esb.asfs.OperTypeLabel;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvCreateCashOrderRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRq;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetCashOrderRs;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRq;
 import ru.philit.ufs.model.entity.esb.asfs.SrvUpdStCashOrderRs;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashOrderStatus;
 import ru.philit.ufs.model.entity.oper.CashOrderType;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
@@ -146,6 +150,60 @@ public class CashOrderAdapter extends AsfsAdapter {
     cashOrder.setCashOrderType(cashOrderType(message.getCashOrderType()));
   }
 
+  private static void map(SrvGetCashOrderRq.SrvGetCashOrderRqMessage message,
+      CashOrderRequest cashOrderRequest) {
+    message.setCreatedFrom(xmlCalendar(cashOrderRequest.getFromDate()));
+    message.setCreatedTo(xmlCalendar(cashOrderRequest.getToDate()));
+  }
+
+  private static void map(SrvGetCashOrderRs.SrvGetCashOrderRsMessage message,
+      ExternalEntityList<CashOrder> cashOrderList) {
+    cashOrderList.setItems(message.getCashOrderItem().stream().map(coi -> {
+      CashOrder co = new CashOrder();
+      co.setCashOrderId(coi.getCashOrderId());
+      co.setCashOrderINum(coi.getCashOrderINum());
+      co.setCashOrderType(cashOrderType(coi.getCashOrderType()));
+      co.setCashOrderStatus(cashOrderStatusType(coi.getCashOrderStatus()));
+      co.setAccountId(coi.getAccountId());
+      co.setAmount(coi.getAmount());
+      co.setCashSymbols(new ArrayList<>());
+      if (coi.getCashSymbols() != null) {
+        for (SrvGetCashOrderRs.SrvGetCashOrderRsMessage.CashOrderItem.CashSymbols.CashSymbolItem
+            item : coi.getCashSymbols().getCashSymbolItem()) {
+          CashSymbol cashSymbol = new CashSymbol();
+          cashSymbol.setCode(item.getCashSymbol());
+          cashSymbol.setAmount(item.getCashSymbolAmount());
+          co.getCashSymbols().add(cashSymbol);
+        }
+      }
+      co.setCreatedDttm(date(coi.getCreatedDttm()));
+      co.setFdestLeName(coi.getFDestLEName());
+
+      Representative representative = new Representative();
+      representative.setInn(coi.getINN());
+      representative.setLastName(coi.getRepFIO().split(" ")[0]);
+      representative.setFirstName(coi.getRepFIO().split(" ")[1]);
+      representative.setPatronymic(coi.getRepFIO().split(" ")[2]);
+      co.setRepresentative(representative);
+      co.setLegalEntityShortName(coi.getLegalEntityShortName());
+      co.setOperationId(coi.getOperationId());
+      Subbranch recipientBank = new Subbranch();
+      recipientBank.setBankName(coi.getRecipientBank());
+      recipientBank.setBic(coi.getRecipientBankBIC());
+      co.setRecipientBank(recipientBank);
+      co.setResponseCode(coi.getResponseCode());
+      co.setResponseMsg(coi.getResponseMsg());
+      co.setUserFullName(coi.getUserFullName());
+      Subbranch senderBank = new Subbranch();
+      senderBank.setBankName(coi.getRecipientBank());
+      senderBank.setBic(coi.getRecipientBankBIC());
+      co.setRecipientBank(senderBank);
+      co.setClientTypeFk(coi.isClientTypeFK());
+      co.setUserPosition(coi.getUserPosition());
+      return co;
+    }).collect(Collectors.toList()));
+  }
+
   /**
    * Возвращает объект запроса на создание кассового ордера.
    */
@@ -171,6 +229,17 @@ public class CashOrderAdapter extends AsfsAdapter {
   }
 
   /**
+   * Возвращает объект запроса на получение кассовых ордеров.
+   */
+  public static SrvGetCashOrderRq requestGetCashOrder(CashOrderRequest cashOrderRequest) {
+    SrvGetCashOrderRq request = new SrvGetCashOrderRq();
+    request.setHeaderInfo(headerInfo());
+    request.setSrvGetCashOrderRqMessage(new SrvGetCashOrderRq.SrvGetCashOrderRqMessage());
+    map(request.getSrvGetCashOrderRqMessage(), cashOrderRequest);
+    return request;
+  }
+
+  /**
    * Преобразует транспортный объект кассового ордера во внутреннюю сущность.
    */
   public static CashOrder convert(SrvCreateCashOrderRs response) {
@@ -188,5 +257,15 @@ public class CashOrderAdapter extends AsfsAdapter {
     map(response.getHeaderInfo(), cashOrder);
     map(response.getSrvUpdCashOrderRsMessage(), cashOrder);
     return cashOrder;
+  }
+
+  /**
+   * Преобразует транспортный объект обновленного кассового ордера во внутреннюю сущность.
+   */
+  public static ExternalEntityList<CashOrder> convert(SrvGetCashOrderRs response) {
+    ExternalEntityList<CashOrder> cashOrderList = new ExternalEntityList<>();
+    map(response.getHeaderInfo(), cashOrderList);
+    map(response.getSrvGetCashOrderRsMessage(), cashOrderList);
+    return cashOrderList;
   }
 }

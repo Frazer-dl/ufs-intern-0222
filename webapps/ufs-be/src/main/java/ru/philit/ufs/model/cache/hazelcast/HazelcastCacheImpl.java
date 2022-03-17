@@ -12,6 +12,7 @@ import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OVER_LIMIT;
 import static ru.philit.ufs.model.entity.request.RequestType.COUNT_COMMISSION;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_CASH_ORDER;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPER_PACKAGE;
+import static ru.philit.ufs.model.entity.request.RequestType.GET_CASH_ORDERS;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OPER_TASKS;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN_LIST;
@@ -47,10 +48,12 @@ import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.account.RepresentativeRequest;
 import ru.philit.ufs.model.entity.account.Seizure;
 import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.LocalKey;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashOrderStatus;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
@@ -262,6 +265,14 @@ public class HazelcastCacheImpl
   @Override
   public List<CashOrder> getCashBook() {
     return (List<CashOrder>) client.getCashBookMap().values();
+  }
+
+  @Override
+  public ExternalEntityList<CashOrder> getCashBook(CashOrderRequest request, ClientInfo clientInfo) {
+    return requestDataFromExternal(
+        request, client.getCashBookByDateMap(), GET_CASH_ORDERS, clientInfo
+    );
+
   }
 
   @Override

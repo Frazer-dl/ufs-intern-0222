@@ -6,6 +6,7 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_BY_CAR
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_BY_ID_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_RESIDUES_BY_ID_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.AUDITED_REQUESTS;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_ORDERS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_ORDER_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_SYMBOLS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP;
@@ -64,11 +65,13 @@ import ru.philit.ufs.model.entity.account.RepresentativeRequest;
 import ru.philit.ufs.model.entity.account.Seizure;
 import ru.philit.ufs.model.entity.common.ExternalEntity;
 import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
+import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.ExternalEntityRequest;
 import ru.philit.ufs.model.entity.common.LocalKey;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashOrder;
+import ru.philit.ufs.model.entity.oper.CashOrderRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
 import ru.philit.ufs.model.entity.oper.Limit;
@@ -183,6 +186,8 @@ public class HazelcastServer {
 
   @Getter private IMap<LocalKey<CashOrder>, CashOrder> cashOrderMap;
 
+  @Getter private IMap<LocalKey<CashOrderRequest>, ExternalEntityList<CashOrder>> cashOrdersMap;
+
   @Getter private IMap<LocalKey<Limit>, ExternalEntityContainer<Boolean>> overLimitMap;
 
   @Getter private IMap<LocalKey<String>, Workplace> workplaceMap;
@@ -263,7 +268,8 @@ public class HazelcastServer {
       config.addMapConfig(mapConfig);
     }
 
-    for (String mapName : new String[]{CASH_ORDER_MAP, OVER_LIMIT_MAP, WORKPLACE_MAP}) {
+    for (String mapName : new String[]{CASH_ORDER_MAP, OVER_LIMIT_MAP, WORKPLACE_MAP,
+        CASH_ORDERS_MAP}) {
       MapConfig mapConfig = new MapConfig();
       mapConfig.setName(mapName);
       mapConfig.setTimeToLiveSeconds(3600);
@@ -313,6 +319,8 @@ public class HazelcastServer {
     cashSymbolsMap = instance.getMap(CASH_SYMBOLS_MAP);
 
     cashOrderMap = instance.getMap(CASH_ORDER_MAP);
+
+    cashOrdersMap = instance.getMap(CASH_ORDERS_MAP);
 
     overLimitMap = instance.getMap(OVER_LIMIT_MAP);
 
