@@ -70,7 +70,8 @@ public class CashOrderAdapterMapStruct extends AsfsAdapter {
    * Преобразует транспортный объект кассового ордера во внутреннюю сущность.
    */
   public static ExternalEntityList<CashOrder> convertMapStruct(SrvGetCashOrderRs response) {
-    ExternalEntityList<CashOrder> entityList = mapper.convert(response.getSrvGetCashOrderRsMessage());
+    ExternalEntityList<CashOrder> entityList =
+        mapper.convert(response.getSrvGetCashOrderRsMessage());
     map(response.getHeaderInfo(), entityList);
     return entityList;
   }

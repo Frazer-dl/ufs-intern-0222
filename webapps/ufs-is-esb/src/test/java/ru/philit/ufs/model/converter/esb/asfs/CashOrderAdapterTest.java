@@ -228,7 +228,8 @@ public class CashOrderAdapterTest extends AsfsAdapterTest {
 
   @Test
   public void testRequestGetCashOrderMapStruct() {
-    SrvGetCashOrderRq request = CashOrderAdapterMapStruct.requestGetCashOrderMapStruct(cashOrderRequest);
+    SrvGetCashOrderRq request =
+        CashOrderAdapterMapStruct.requestGetCashOrderMapStruct(cashOrderRequest);
     assertHeaderInfo(headerInfo());
     Assert.assertNotNull(request.getSrvGetCashOrderRqMessage());
     Assert.assertEquals(request.getSrvGetCashOrderRqMessage().getCreatedFrom(),
