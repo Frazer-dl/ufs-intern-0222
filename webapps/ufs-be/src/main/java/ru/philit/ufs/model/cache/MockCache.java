@@ -21,6 +21,4 @@ public interface MockCache {
 
   Operation cancelOperation(Operation operation);
 
-  CashOrder createCashOrder(Operation operation, OperationTaskDeposit taskDeposit);
-
 }

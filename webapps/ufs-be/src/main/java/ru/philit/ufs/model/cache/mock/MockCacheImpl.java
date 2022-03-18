@@ -27,7 +27,6 @@ public class MockCacheImpl implements MockCache {
   private static final String LOGIN_IVANOV = "Ivanov_II";
   private static final String LOGIN_SIDOROV = "Sidorov_SS";
   private static final String LOGIN_SVETLOVA = "Svetlova_SS";
-  private AtomicInteger cashOrderNumber = new AtomicInteger(0);
 
   @Override
   public User getUser(String userLogin, String password) {
@@ -114,38 +113,4 @@ public class MockCacheImpl implements MockCache {
     return operation;
   }
 
-  @Override
-  public CashOrder createCashOrder(Operation operation, OperationTaskDeposit taskDeposit) {
-    CashOrder cashOrder = new CashOrder();
-    cashOrder.setResponseCode(String.valueOf(taskDeposit.getResponseCode()));
-    cashOrder.setCashOrderId(UuidUtils.getRandomUuid());
-    cashOrder.setCashOrderINum(String.valueOf(cashOrderNumber.incrementAndGet()));
-    cashOrder.setCreatedDttm(operation.getCreatedDate());
-    cashOrder.setCashOrderType(CashOrderType.KO_1);
-    cashOrder.setOperationType(operation.getTypeCode());
-    cashOrder.setCashOrderStatus(CashOrderStatus.CREATED);
-    cashOrder.setRepresentative(new Representative());
-    cashOrder.getRepresentative().setId(taskDeposit.getRepresentativeId());
-    cashOrder.getRepresentative().setLastName(taskDeposit.getRepFio().split(" ")[0]);
-    cashOrder.getRepresentative().setFirstName(taskDeposit.getRepFio().split(" ")[1]);
-    cashOrder.getRepresentative().setPatronymic(taskDeposit.getRepFio().split(" ")[3]);
-    cashOrder.getRepresentative().setInn(taskDeposit.getInn());
-    cashOrder.setLegalEntityShortName(taskDeposit.getLegalEntityShortName());
-    cashOrder.setAmount(taskDeposit.getAmount());
-    cashOrder.setAccountId(taskDeposit.getAccountId());
-    cashOrder.setRecipientBank(new Subbranch());
-    cashOrder.getRecipientBank().setBankName(taskDeposit.getRecipientBank());
-    cashOrder.getRecipientBank().setBic(taskDeposit.getRecipientBankBic());
-    cashOrder.getRecipientBank().setCorrespondentAccount(taskDeposit.getRecipientAccountId());
-    cashOrder.setSenderBank(new Subbranch());
-    cashOrder.getSenderBank().setBankName(taskDeposit.getSenderBank());
-    cashOrder.getSenderBank().setBic(taskDeposit.getSenderBankBic());
-    cashOrder.getSenderBank().setCorrespondentAccount(taskDeposit.getSenderAccountId());
-    cashOrder.setClientTypeFk(taskDeposit.isClientTypeFk());
-    cashOrder.setOperationId(operation.getId());
-    cashOrder.setCurrencyType(taskDeposit.getCurrencyType());
-    cashOrder.setCashSymbols(taskDeposit.getCashSymbols());
-    cashOrder.setWorkPlaceUId(operation.getWorkplaceId());
-    return cashOrder;
-  }
 }

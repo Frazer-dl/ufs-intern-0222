@@ -263,12 +263,8 @@ public class HazelcastCacheImpl
   }
 
   @Override
-  public List<CashOrder> getCashBook() {
-    return (List<CashOrder>) client.getCashBookMap().values();
-  }
-
-  @Override
-  public ExternalEntityList<CashOrder> getCashBook(CashOrderRequest request, ClientInfo clientInfo) {
+  public ExternalEntityList<CashOrder> getCashBook(CashOrderRequest request,
+      ClientInfo clientInfo) {
     return requestDataFromExternal(
         request, client.getCashBookByDateMap(), GET_CASH_ORDERS, clientInfo
     );

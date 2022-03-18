@@ -2,6 +2,7 @@ package ru.philit.ufs.web.provider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -20,6 +21,7 @@ import ru.philit.ufs.model.entity.oper.OperationTaskDeposit;
 import ru.philit.ufs.model.entity.oper.OperationTaskStatus;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
+import ru.philit.ufs.model.entity.user.Subbranch;
 import ru.philit.ufs.util.UuidUtils;
 import ru.philit.ufs.web.exception.InvalidDataException;
 
@@ -32,6 +34,7 @@ public class OperationProvider {
   private final RepresentativeProvider representativeProvider;
   private final OperationCache cache;
   private final MockCache mockCache;
+  private final AtomicInteger cashOrderNumber = new AtomicInteger(0);
 
   /**
    * Конструктор бина.
@@ -216,7 +219,7 @@ public class OperationProvider {
     }
     if (operationTaskDeposit != null) {
       Operation operation = mockCache.createOperation(workplaceId, operationTypeCode);
-      CashOrder cashOrder = mockCache.createCashOrder(operation,
+      CashOrder cashOrder = createCashOrder(operation,
           (OperationTaskDeposit) operationTaskDeposit);
       cache.createCashOrder(cashOrder, clientInfo);
       operation.setCashOrderId(cashOrder.getCashOrderId());
@@ -278,5 +281,39 @@ public class OperationProvider {
     cache.addOperation(taskId, operation);
 
     return operation;
+  }
+
+  private CashOrder createCashOrder(Operation operation, OperationTaskDeposit taskDeposit) {
+    CashOrder cashOrder = new CashOrder();
+    cashOrder.setResponseCode(String.valueOf(taskDeposit.getResponseCode()));
+    cashOrder.setCashOrderId(UuidUtils.getRandomUuid());
+    cashOrder.setCashOrderINum(String.valueOf(cashOrderNumber.incrementAndGet()));
+    cashOrder.setCreatedDttm(operation.getCreatedDate());
+    cashOrder.setCashOrderType(CashOrderType.KO_1);
+    cashOrder.setOperationType(operation.getTypeCode());
+    cashOrder.setCashOrderStatus(CashOrderStatus.CREATED);
+    cashOrder.setRepresentative(new Representative());
+    cashOrder.getRepresentative().setId(taskDeposit.getRepresentativeId());
+    cashOrder.getRepresentative().setLastName(taskDeposit.getRepFio().split(" ")[0]);
+    cashOrder.getRepresentative().setFirstName(taskDeposit.getRepFio().split(" ")[1]);
+    cashOrder.getRepresentative().setPatronymic(taskDeposit.getRepFio().split(" ")[3]);
+    cashOrder.getRepresentative().setInn(taskDeposit.getInn());
+    cashOrder.setLegalEntityShortName(taskDeposit.getLegalEntityShortName());
+    cashOrder.setAmount(taskDeposit.getAmount());
+    cashOrder.setAccountId(taskDeposit.getAccountId());
+    cashOrder.setRecipientBank(new Subbranch());
+    cashOrder.getRecipientBank().setBankName(taskDeposit.getRecipientBank());
+    cashOrder.getRecipientBank().setBic(taskDeposit.getRecipientBankBic());
+    cashOrder.getRecipientBank().setCorrespondentAccount(taskDeposit.getRecipientAccountId());
+    cashOrder.setSenderBank(new Subbranch());
+    cashOrder.getSenderBank().setBankName(taskDeposit.getSenderBank());
+    cashOrder.getSenderBank().setBic(taskDeposit.getSenderBankBic());
+    cashOrder.getSenderBank().setCorrespondentAccount(taskDeposit.getSenderAccountId());
+    cashOrder.setClientTypeFk(taskDeposit.isClientTypeFk());
+    cashOrder.setOperationId(operation.getId());
+    cashOrder.setCurrencyType(taskDeposit.getCurrencyType());
+    cashOrder.setCashSymbols(taskDeposit.getCashSymbols());
+    cashOrder.setWorkPlaceUId(operation.getWorkplaceId());
+    return cashOrder;
   }
 }

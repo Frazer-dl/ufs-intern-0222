@@ -37,8 +37,6 @@ public interface OperationCache {
 
   void addCashOrderToCashBook(CashOrder cashOrder);
 
-  List<CashOrder> getCashBook();
-
   ExternalEntityList<CashOrder> getCashBook(CashOrderRequest request, ClientInfo clientInfo);
 
 }
